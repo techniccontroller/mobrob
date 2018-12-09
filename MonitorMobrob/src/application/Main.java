@@ -33,7 +33,7 @@ public class Main extends Application {
 			
 			// show the GUI
 			primaryStage.show();
-			controller.clearKOOS();
+			//controller.clearKOOS();
 			
 			// set the proper behavior on closing the application
 			primaryStage.setOnCloseRequest((new EventHandler<WindowEvent>() {

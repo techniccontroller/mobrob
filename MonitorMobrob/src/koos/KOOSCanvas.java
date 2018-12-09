@@ -1,44 +1,38 @@
 package koos;
 
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.input.ScrollEvent;
+
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcType;
-import javafx.scene.shape.StrokeType;
+
 import javafx.scene.transform.Affine;
-import javafx.scene.transform.Translate;
+
 
 public class KOOSCanvas extends Canvas {
 	
-	private double xmax, ymax;
-	private double scalex, scaley;
-	private Affine transform;
+	private double xmax, ymax, ratio;
+	private double scale;
 	private GraphicsContext gc;
 	
 	public KOOSCanvas() {
 		this.gc = getGraphicsContext2D();
 		this.xmax = 4000.0;
-		this.ymax = 3000.0;
-		this.scalex = 800 / 2.0 / xmax;
-		this.scaley = 600 / 2.0 / ymax;
-
-		double xshift = getWidth() / 2;
-		double yshift = getHeight() / 2;
-		double xmult = 1;
-		double ymult = -1;
-
-		transform = new Affine(xmult, 0, xshift, 0, ymult, yshift);
-		//transform = new Translate(ymult, yshift);
-
 		clear();
+		
+		setOnScroll(new EventHandler<ScrollEvent>() {
+
+			@Override
+			public void handle(ScrollEvent event) {
+				xmax = xmax + ratio * event.getDeltaY()*3;
+				scale = getHeight() / 2.0 / xmax;
+				clear();
+			}
+			
+		});
 	}
 	
 	public void clear() {
@@ -82,51 +76,82 @@ public class KOOSCanvas extends Canvas {
 		gc.fillArc(180, 30, 30, 30, 45, 270, ArcType.ROUND);
 	}
 	
-	public void drawDataPoint(double x, double y, double width, double height) {
-		gc.setFill(Color.WHITE);
-		gc.fillOval((x * scalex), (y * scaley), (width * scalex), (height * scaley));
+	public void drawDataPoint(double x, double y, double width, double height, Color color) {
+		gc.setFill(color);
+		gc.fillOval((x * scale), (y * scale), (width * scale), (height * scale));
+	}
+	
+	private void drawCircle(double radius) {
+		gc.strokeOval(0-radius, 0-radius, radius*2, radius*2);
 	}
 	
 	public void drawCross() {
-		double w = getWidth() / 2;
-		double h = getHeight() / 2;
-		int pad = 0;
-		
-		gc.setTransform(new Affine());
-		gc.setStroke(Color.BLACK);
-		gc.setLineWidth(2);
-		gc.setFill(Color.WHITE);
-		gc.fillText("x", 2 * w - 20, h - 10);
-		gc.fillText("y", w + 10, 20);
-
-		gc.fillText("" + (ymax / 2), w - 50, (h / 2) + 5);
-		gc.fillText("" + (xmax / 2), (3 * w / 2) - 5, h + 20);
-
-		// ----- transform --------
-		gc.setTransform(1, 0, 0, -1, getWidth()/2, getHeight()/2);
-		gc.setStroke(Color.LIGHTGREY);
-		gc.strokeLine(0, -h, 0, h); // y
-		gc.strokeLine(-w, 0, w, 0); // x
-		
-		gc.strokeLine(-5, h - 10, 0, h); // y-Pfeil
-		gc.strokeLine(5, h - 10, 0, h);
-		gc.strokeLine(w - 10, 5, w, 0); // x-Pfeil
-		gc.strokeLine(w - 10, -5, w, 0);
-
-		int tics, len;
-		gc.setStroke(Color.LIGHTGREY);
-		tics = 10;
-		len = 4;
-		for (double i = -w + tics; i <= w - tics; i += tics) // y-Unterteilung
-			gc.strokeLine(-len, i, len, i);
-		for (double i = -w + tics; i <= w - tics; i += tics) // x-Unterteilung
-			gc.strokeLine(i, -len, i, len);
-		gc.setStroke(Color.LIGHTGREY);
-		tics = 50;
-		len = 8;
-		for (double i = -w + tics; i <= w - tics; i += tics) // y-Unterteilung
-			gc.strokeLine(-len, i, len, i);
-		for (double i = -w + tics; i <= w - tics; i += tics) // x-Unterteilung
-			gc.strokeLine(i, -len, i, len);
+		if(getWidth() > 0) {
+			this.ymax = xmax * getWidth()*1.0/getHeight();
+			this.scale = getHeight() / 2.0 / xmax;
+			this.ratio = xmax/ymax;
+			double lenAxisY = getWidth() / 2;
+			double lenAxisX = getHeight() / 2;
+			
+			gc.setTransform(new Affine());
+			gc.setStroke(Color.BLACK);
+			gc.setLineWidth(2);
+			gc.setFill(Color.WHITE);
+			gc.fillText("y", 20, lenAxisX - 10);
+			gc.fillText("x", lenAxisY + 10, 20);
+			
+						
+			// Add lables for 1000, 2000, 3000, 4000, ...
+			for(int i = 1000; i < ymax || i < xmax; i+=1000) {
+				gc.setTransform(0, -1, 1, 0, getWidth()/2, getHeight()/2);
+				gc.setStroke(Color.BLACK);
+				gc.setLineWidth(1);
+				drawCircle(i*scale);
+				// labeling x-Axis
+				gc.setTransform(new Affine());
+				gc.fillText("" + i, lenAxisY - 50, lenAxisX - i*scale + 5);
+				
+				// labeling y-Axis
+				gc.setTransform(0, -1, 1, 0, getWidth()/2, getHeight()/2);
+				gc.fillText("" + i, -50, -i*scale + 5);
+			}
+			
+			gc.setTransform(0, -1, -1, 0, getWidth()/2, getHeight()/2);
+								
+			gc.setStroke(Color.LIGHTGREY);
+			gc.strokeLine(0, -lenAxisY, 0, lenAxisY); // y
+			gc.strokeLine(-lenAxisX, 0, lenAxisX, 0); // x
+			
+			gc.strokeLine(-5, lenAxisY - 10, 0, lenAxisY); // y-Pfeil
+			gc.strokeLine(5, lenAxisY - 10, 0, lenAxisY);
+			gc.strokeLine(lenAxisX - 10, 5, lenAxisX, 0); // x-Pfeil
+			gc.strokeLine(lenAxisX - 10, -5, lenAxisX, 0);
+	
+			double tics, len;
+			gc.setStroke(Color.LIGHTGREY);
+			tics = (200 * scale);
+			len = 4;
+			for (double i = 0; i <= lenAxisY; i += tics) { // y-Unterteilung
+				gc.strokeLine(-len, i, len, i);
+				gc.strokeLine(-len, -i, len, -i);
+			}
+				
+			for (double i = 0; i <= lenAxisY; i += tics) { // x-Unterteilung
+				gc.strokeLine(i, -len, i, len);
+				gc.strokeLine(-i, -len, -i, len);
+			}
+			gc.setStroke(Color.LIGHTGREY);
+			tics = (1000 * scale);
+			len = 8;
+			for (double i = 0; i <= lenAxisY; i += tics) { // y-Unterteilung
+				gc.strokeLine(-len, i, len, i);
+				gc.strokeLine(-len, -i, len, -i);
+			}
+				
+			for (double i = 0; i <= lenAxisY; i += tics) { // x-Unterteilung
+				gc.strokeLine(i, -len, i, len);
+				gc.strokeLine(-i, -len, -i, len);
+			}
+		}
 	}
 }

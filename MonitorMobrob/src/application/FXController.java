@@ -25,7 +25,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import koos.KOOSCanvas;
+import koos.LSScan;
 import koos.LSScanPoint;
 import utils.Utils;
 
@@ -57,6 +59,8 @@ public class FXController {
 	private Socket clientSocketLS;
 	private OutputStreamWriter outToServerLS;
 	private BufferedReader inFromServerLS;
+	
+	private LSScan lsscanner = new LSScan();
 
 	@FXML
 	protected void startCamera(ActionEvent event) {
@@ -167,17 +171,13 @@ public class FXController {
 								outToServerLS.write(message);
 								outToServerLS.flush();
 								String data = inFromServerLS.readLine();
-								String koordinates[] = data.split(";");
-								clearKOOS();
-								System.out.println(data);
-								for (int i = 0; i < koordinates.length; i++) {
-									if (koordinates[i].length() > 0) {
-										LSScanPoint k = new LSScanPoint(koordinates[i]);
-										if (k.getDist() > 0) {
-											koosCanvas.drawDataPoint(k.getX(), k.getY(), 50, 50);
-										}
-									}
-								}
+								koosCanvas.clear();
+								lsscanner.addRawData(data);
+								lsscanner.getScanpoints().stream().forEach(sp -> koosCanvas.drawDataPoint(sp.getX(), sp.getY(), 20, 20, Color.WHITE));
+								lsscanner.getClusters().stream().forEach(c -> {
+									LSScanPoint s = c.getMiddlePoint();
+									koosCanvas.drawDataPoint(s.getX(), s.getY(),50, 50, Color.RED);
+								});
 							}
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
@@ -239,10 +239,6 @@ public class FXController {
 		} else {
 			return -1;
 		}
-	}
-
-	public void clearKOOS() {
-		koosCanvas.clear();
 	}
 
 	/**
