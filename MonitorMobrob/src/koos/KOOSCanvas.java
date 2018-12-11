@@ -27,9 +27,12 @@ public class KOOSCanvas extends Canvas {
 
 			@Override
 			public void handle(ScrollEvent event) {
-				xmax = xmax + ratio * event.getDeltaY()*3;
-				scale = getHeight() / 2.0 / xmax;
-				clear();
+				if(!((xmax < 500 && event.getDeltaY() < 0) || (xmax > 12000 && event.getDeltaY() > 0))) {
+					xmax = xmax + ratio * event.getDeltaY()*3;
+					scale = getHeight() / 2.0 / xmax;
+					clear();
+				}
+				
 			}
 			
 		});
@@ -78,7 +81,10 @@ public class KOOSCanvas extends Canvas {
 	
 	public void drawDataPoint(double x, double y, double width, double height, Color color) {
 		gc.setFill(color);
-		gc.fillOval((x * scale), (y * scale), (width * scale), (height * scale));
+		double lenAxisY = getWidth() / 2;
+		double lenAxisX = getHeight() / 2;
+		if(x*scale > -lenAxisX && x*scale < lenAxisX &&  y*scale > -lenAxisY && y*scale < lenAxisY)
+			gc.fillOval(((x-width/2) * scale), ((y-height/2) * scale), (width * scale), (height * scale));
 	}
 	
 	private void drawCircle(double radius) {
