@@ -19,6 +19,7 @@ import javax.imageio.ImageIO;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -70,7 +71,7 @@ public class FXController {
 	private ScheduledExecutorService pool = Executors.newScheduledThreadPool(3);
 	private ScheduledFuture<?> timerCam;
 	private ScheduledFuture<?> timerLS;
-	
+
 	private Timeline timeline;
 
 	// a flag to change the button behavior
@@ -86,37 +87,38 @@ public class FXController {
 	private Socket clientSocketLS;
 	private OutputStreamWriter outToServerLS;
 	private BufferedReader inFromServerLS;
-	
+
 	private Socket clientSocketCon;
 	private OutputStreamWriter outToServerCon;
 	private BufferedReader inFromServerCon;
-	
+
 	private LSScan lsscanner = new LSScan();
-	
+
 	private double mouseX, mouseY;
 	private double startposX, startposY;
-	
+
 	public void setupControl() {
-		paneControl.setBackground(new Background(new BackgroundFill(new Color(0, 0, 1, 0.5), new CornerRadii(10), new Insets(0))));
-		
+		paneControl.setBackground(
+				new Background(new BackgroundFill(new Color(0, 0, 1, 0.5), new CornerRadii(10), new Insets(0))));
+
 		paneControl.setOnMousePressed(evt -> {
 			startposX = this.paneControl.getTranslateX();
 			startposY = this.paneControl.getTranslateY();
-			
+
 			mouseX = evt.getScreenX();
-	        mouseY = evt.getScreenY();
-	    });
+			mouseY = evt.getScreenY();
+		});
 		paneControl.setOnMouseDragged(mouseevent -> {
-			this.paneControl.setTranslateX(startposX + mouseevent.getScreenX()-mouseX);
-			this.paneControl.setTranslateY(startposY + mouseevent.getScreenY()-mouseY);
-	    });
+			this.paneControl.setTranslateX(startposX + mouseevent.getScreenX() - mouseX);
+			this.paneControl.setTranslateY(startposY + mouseevent.getScreenY() - mouseY);
+		});
 	}
-	
+
 	@FXML
 	protected void controlForward(ActionEvent event) {
 		try {
 			if (clientSocketCon.isConnected()) {
-				outToServerCon.write("stop(60,0,0)\n");
+				outToServerCon.write("move(60,60,0)\n");
 				outToServerCon.flush();
 				System.out.println(inFromServerCon.readLine());
 			}
@@ -125,7 +127,7 @@ public class FXController {
 			System.err.println("Error while reading camera stream: " + e.getMessage());
 		}
 	}
-	
+
 	protected void startControlSocket() {
 		try {
 			if (clientSocketCon == null || clientSocketCon.isClosed()) {
@@ -145,9 +147,9 @@ public class FXController {
 			alert.showAndWait();
 		}
 	}
-	
-	protected void stopControlSocket(){
-		if (!(clientSocketCon == null) &&  !clientSocketCon.isClosed()) {
+
+	protected void stopControlSocket() {
+		if (!(clientSocketCon == null) && !clientSocketCon.isClosed()) {
 			try {
 				clientSocketCon.shutdownOutput();
 				clientSocketCon.close();
@@ -155,7 +157,7 @@ public class FXController {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
 	}
 
@@ -253,64 +255,61 @@ public class FXController {
 					outToServerLS = new OutputStreamWriter(clientSocketLS.getOutputStream());
 					inFromServerLS = new BufferedReader(new InputStreamReader(clientSocketLS.getInputStream()));
 				}
-				
-				timeline = new Timeline(new KeyFrame(
-				        Duration.millis( 200 ),
-				        event2 -> {
-				        	String message;
 
-							message = "getData";
-							try {
-								if (laserActive) {
-									outToServerLS.write(message);
-									outToServerLS.flush();
-									String data = inFromServerLS.readLine();
+				timeline = new Timeline(new KeyFrame(Duration.millis(200), event2 -> {
+					String message;
+
+					message = "getData";
+					try {
+						if (laserActive) {
+							outToServerLS.write(message);
+							outToServerLS.flush();
+							String data = inFromServerLS.readLine();
+							
+							lsscanner.addRawData(data);
+							System.out.println(lsscanner.getScanpoints().size());
+							Platform.runLater(new Runnable() {
+								@Override
+								public void run() {
 									koosCanvas.clear();
-									lsscanner.addRawData(data);
-									lsscanner.getScanpoints().stream().forEach(sp -> koosCanvas.drawDataPoint(sp.getX(), sp.getY(), 20, 20, Color.WHITE));
+									lsscanner.getScanpoints().stream()
+											.forEach(sp -> koosCanvas.drawDataPoint(sp.getX(), sp.getY(), 20, 20, Color.WHITE));
+							
 									lsscanner.getClusters().stream().forEach(c -> {
 										LSScanPoint s = c.getMiddlePoint();
-										koosCanvas.drawDataPoint(s.getX(), s.getY(),50, 50, Color.RED);
+										koosCanvas.drawDataPoint(s.getX(), s.getY(), 50, 50, Color.RED);
 									});
 								}
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								System.err.println("Error while reading laser stream: " + e.getMessage());
-							}
-				        }
-				));
-				timeline.setCycleCount( Animation.INDEFINITE );
-				timeline.play();
-				
-				/*// grab a frame every 33 ms (30 frames/sec)
-				Runnable frameGrabber = new Runnable() {
-
-					@Override
-					public void run() {
-						String message;
-
-						message = "getData";
-						try {
-							if (laserActive) {
-								outToServerLS.write(message);
-								outToServerLS.flush();
-								String data = inFromServerLS.readLine();
-								koosCanvas.clear();
-								lsscanner.addRawData(data);
-								lsscanner.getScanpoints().stream().forEach(sp -> koosCanvas.drawDataPoint(sp.getX(), sp.getY(), 20, 20, Color.WHITE));
-								lsscanner.getClusters().stream().forEach(c -> {
-									LSScanPoint s = c.getMiddlePoint();
-									koosCanvas.drawDataPoint(s.getX(), s.getY(),50, 50, Color.RED);
-								});
-							}
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							System.err.println("Error while reading laser stream: " + e.getMessage());
+							});
 						}
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						System.err.println("Error while reading laser stream: " + e.getMessage());
 					}
+				}));
+				timeline.setCycleCount(Animation.INDEFINITE);
+				timeline.play();
 
-				};
-				this.timerLS = this.pool.scheduleAtFixedRate(frameGrabber, 0, 200, TimeUnit.MILLISECONDS);*/
+				/*
+				 * // grab a frame every 33 ms (30 frames/sec) Runnable frameGrabber = new
+				 * Runnable() {
+				 * 
+				 * @Override public void run() { String message;
+				 * 
+				 * message = "getData"; try { if (laserActive) { outToServerLS.write(message);
+				 * outToServerLS.flush(); String data = inFromServerLS.readLine();
+				 * koosCanvas.clear(); lsscanner.addRawData(data);
+				 * lsscanner.getScanpoints().stream().forEach(sp ->
+				 * koosCanvas.drawDataPoint(sp.getX(), sp.getY(), 20, 20, Color.WHITE));
+				 * lsscanner.getClusters().stream().forEach(c -> { LSScanPoint s =
+				 * c.getMiddlePoint(); koosCanvas.drawDataPoint(s.getX(), s.getY(),50, 50,
+				 * Color.RED); }); } } catch (IOException e) { // TODO Auto-generated catch
+				 * block System.err.println("Error while reading laser stream: " +
+				 * e.getMessage()); } }
+				 * 
+				 * }; this.timerLS = this.pool.scheduleAtFixedRate(frameGrabber, 0, 200,
+				 * TimeUnit.MILLISECONDS);
+				 */
 
 				// update the button content
 				this.start_laser_btn.setText("Stop Laser");
@@ -380,12 +379,14 @@ public class FXController {
 
 		try {
 			if (timerCam != null) {
-				while (!timerCam.isDone());
+				while (!timerCam.isDone())
+					;
 				if (!clientSocketCam.isClosed()) {
-					if(showServerConfirmation("Camera") == 1) {
+					if (showServerConfirmation("Camera") == 1) {
 						outToServerCam.write("closeDriver");
 						outToServerCam.flush();
-					};
+					}
+					;
 					System.out.println("Close Cam Socket...");
 					clientSocketCam.shutdownOutput();
 					clientSocketCam.close();
@@ -406,20 +407,22 @@ public class FXController {
 	private void stopAcquisitionLS()
 
 	{
-		
+
 		if (this.timeline != null && this.timeline.getStatus() == Animation.Status.RUNNING) {
 			// stop the timer
 			this.timeline.stop();
 		}
-		
+
 		try {
 			if (timeline != null) {
-				while (this.timeline.getStatus() == Animation.Status.RUNNING);
+				while (this.timeline.getStatus() == Animation.Status.RUNNING)
+					;
 				if (!clientSocketLS.isClosed()) {
-					if(showServerConfirmation("Laser") == 1) {
+					if (showServerConfirmation("Laser") == 1) {
 						outToServerLS.write("closeDriver");
 						outToServerLS.flush();
-					};
+					}
+					;
 					System.out.println("Close LS Socket...");
 					clientSocketLS.shutdownOutput();
 					clientSocketLS.close();
@@ -430,31 +433,21 @@ public class FXController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		/*if (this.timerLS != null && !this.timerLS.isDone()) {
-			// stop the timer
-			this.timerLS.cancel(true);
-		}
-		
-		
-		try {
-			if (timerLS != null) {
-				while (!timerLS.isDone());
-				if (!clientSocketLS.isClosed()) {
-					if(showServerConfirmation("Laser") == 1) {
-						outToServerLS.write("closeDriver");
-						outToServerLS.flush();
-					};
-					System.out.println("Close LS Socket...");
-					clientSocketLS.shutdownOutput();
-					clientSocketLS.close();
-				}
-			}
 
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
+		/*
+		 * if (this.timerLS != null && !this.timerLS.isDone()) { // stop the timer
+		 * this.timerLS.cancel(true); }
+		 * 
+		 * 
+		 * try { if (timerLS != null) { while (!timerLS.isDone()); if
+		 * (!clientSocketLS.isClosed()) { if(showServerConfirmation("Laser") == 1) {
+		 * outToServerLS.write("closeDriver"); outToServerLS.flush(); };
+		 * System.out.println("Close LS Socket..."); clientSocketLS.shutdownOutput();
+		 * clientSocketLS.close(); } }
+		 * 
+		 * } catch (IOException e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); }
+		 */
 	}
 
 	/**
