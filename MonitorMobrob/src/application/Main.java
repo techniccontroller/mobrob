@@ -30,8 +30,8 @@ public class Main extends Application {
 			
 			FXController controller = loader.getController();
 			
+			controller.initPeri();
 			controller.setupControl();
-			controller.startControlSocket();
 			
 			// show the GUI
 			primaryStage.show();
