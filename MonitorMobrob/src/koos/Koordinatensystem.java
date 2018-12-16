@@ -107,10 +107,12 @@ public class Koordinatensystem extends JFrame {
 			repaint();
 		}
 
+		@Override
 		public Dimension getMinimumSize() {
 			return new Dimension(width, height);
 		}
 
+		@Override
 		public Dimension getPreferredSize() {
 			return new Dimension(width, height);
 		}
@@ -123,6 +125,7 @@ public class Koordinatensystem extends JFrame {
 			offGraph.drawOval((int) (x * scalex), (int) (y * scaley), (int) (width * scalex), (int) (height * scaley));
 		}
 
+		@Override
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
 			g.drawImage(offImg, 0, 0, this);

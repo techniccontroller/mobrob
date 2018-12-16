@@ -45,7 +45,8 @@ public class LSScanner {
 		this.ipaddress = ip;
 		this.port = port;
 		scanpoints = new ArrayList<LSScanPoint>();
-		clusters = new ArrayList<LSCluster>();
+		clusters = new ArrayList<>();
+		koosCanvas.clear();
 	}
 	
 	
@@ -141,6 +142,7 @@ public class LSScanner {
 			e.printStackTrace();
 		}
 		this.laserActive = false;
+		koosCanvas.clear();
 	}
 	
 	public void addRawData(String data) {

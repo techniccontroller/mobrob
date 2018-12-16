@@ -129,7 +129,7 @@ public class FXController {
 						angle = angle+180;
 					}
 					if((dist > 10 && dist != lastdist) || angle != lastangle) {
-						robot.getActuator().speed((int)(60*dist/80), -angle, 0);
+						robot.getActuator().speed(60*dist/80, -angle, 0);
 					}else if (dist <= 10) {
 						robot.getActuator().stop();
 					}

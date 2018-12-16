@@ -5,8 +5,6 @@ import java.awt.image.DataBufferByte;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
-
 import utils.Utils;
 
 public class ImageProcessing {

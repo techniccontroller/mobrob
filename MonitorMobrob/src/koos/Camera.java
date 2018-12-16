@@ -1,5 +1,7 @@
 package koos;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -44,6 +46,30 @@ public class Camera {
 		this.fxcontroller = fxcontroller;
 		this.ipaddress = ip;
 		this.port = port;
+		displayBlankImage();
+	}
+	
+	private void displayBlankImage() {
+		BufferedImage dummy = getBlankImage(640, 480);
+		Image imageToShow = SwingFXUtils.toFXImage(dummy, null);
+		fxcontroller.updateCameraImageView(imageToShow);
+	}
+	
+	private BufferedImage getBlankImage(int width, int height) {
+		BufferedImage bImage = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
+		 
+		Graphics2D g = (Graphics2D) bImage.getGraphics();
+		 
+		// Clear the background with white
+		g.setBackground(Color.BLACK);
+		g.clearRect(0, 0, width, height);
+		 
+		// Write some text
+		g.setColor(Color.WHITE);
+		g.drawString("Camera is OFF", width/2 - 50, height/2 - 20);
+		 
+		g.dispose();
+		return bImage;
 	}
 	
 	public int startCameraSocket() {
@@ -152,6 +178,7 @@ public class Camera {
 			e.printStackTrace();
 		}
 		this.cameraActive = false;
+		displayBlankImage();
 	}
 
 	public BufferedImage getCameraFrame() {
