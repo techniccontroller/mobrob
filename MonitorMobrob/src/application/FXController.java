@@ -245,7 +245,6 @@ public class FXController {
 	}
 
 	public int showServerConfirmation(String type) {
-
 		Alert alert = new Alert(AlertType.CONFIRMATION);
 		alert.setTitle("Close Driver");
 		alert.setHeaderText("Soll der " + type + " Server geschlossen werden?");
