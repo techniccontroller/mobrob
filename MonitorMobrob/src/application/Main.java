@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import koos.Robot;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.fxml.FXMLLoader;
@@ -28,14 +29,18 @@ public class Main extends Application {
 			primaryStage.setTitle("JavaFX meets OpenCV");
 			primaryStage.setScene(scene);
 			
-			FXController controller = loader.getController();
 			
-			controller.initPeri();
+			
+			FXController controller = loader.getController();
 			controller.setupControl();
+			
+			Robot robot = new Robot("192.168.0.111", controller);
+			robot.initLaserscanner(1234);
+			robot.initActuator(5054);
+			robot.initCamera(5001);
 			
 			// show the GUI
 			primaryStage.show();
-			//controller.clearKOOS();
 			
 			// set the proper behavior on closing the application
 			primaryStage.setOnCloseRequest((new EventHandler<WindowEvent>() {

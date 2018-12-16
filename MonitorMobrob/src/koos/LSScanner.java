@@ -140,23 +140,8 @@ public class LSScanner {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		/*
-		 * if (this.timerLS != null && !this.timerLS.isDone()) { // stop the timer
-		 * this.timerLS.cancel(true); }
-		 * 
-		 * 
-		 * try { if (timerLS != null) { while (!timerLS.isDone()); if
-		 * (!clientSocketLS.isClosed()) { if(showServerConfirmation("Laser") == 1) {
-		 * outToServerLS.write("closeDriver"); outToServerLS.flush(); };
-		 * System.out.println("Close LS Socket..."); clientSocketLS.shutdownOutput();
-		 * clientSocketLS.close(); } }
-		 * 
-		 * } catch (IOException e) { // TODO Auto-generated catch block
-		 * e.printStackTrace(); }
-		 */
+		this.laserActive = false;
 	}
-	
 	
 	public void addRawData(String data) {
 		scanpoints.clear();

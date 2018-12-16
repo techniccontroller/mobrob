@@ -1,26 +1,7 @@
 package application;
 
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.Socket;
-import java.util.Base64;
 import java.util.Optional;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
-import javax.imageio.ImageIO;
-
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.application.Platform;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -40,12 +21,10 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.util.Duration;
-import koos.Actuator;
-import koos.Camera;
+import javafx.scene.shape.Circle;
+import javafx.scene.text.Text;
 import koos.KOOSCanvas;
-import koos.LSScanner;
-import koos.LSScanPoint;
+import koos.Robot;
 import utils.Utils;
 
 public class FXController {
@@ -71,22 +50,28 @@ public class FXController {
 	private ImageView currentFrame;
 	@FXML
 	private KOOSCanvas koosCanvas;
-
-
-	private LSScanner lsscanner;
-	private Actuator actuator;
-	private Camera camera;
+	@FXML
+	private Text joystickText;
+	@FXML
+	private Circle joystick;
+	@FXML
+	private Circle joystickBackground;
+	
+	private Robot robot;
 
 	private double mouseX, mouseY;
 	private double startposX, startposY;
 	
 	private KeyCode previousKey = null;
-
-	public void initPeri() {
-		lsscanner = new LSScanner("192.168.0.111", 1234, this);
-		actuator = new Actuator("192.168.0.111", 5054);
-		actuator.startActuatorSocket();
-		camera = new Camera("192.168.0.111", 5001, this);
+	
+	private long lastTimeOfControl = 0;
+	private int lastangle = 0;
+	private int lastdist = 0;
+	private enum ControlMode{TRANSLATION, ROTATION};
+	private ControlMode controlMode = ControlMode.TRANSLATION;
+	
+	public void setRobot(Robot robot) {
+		this.robot = robot;
 	}
 	
 	public void setupControl() {
@@ -104,82 +89,157 @@ public class FXController {
 			this.paneControl.setTranslateX(startposX + mouseevent.getScreenX() - mouseX);
 			this.paneControl.setTranslateY(startposY + mouseevent.getScreenY() - mouseY);
 		});
+		
+		joystickBackground.setOnMouseClicked(event -> {
+			if(controlMode == ControlMode.TRANSLATION) {
+				controlMode = ControlMode.ROTATION;
+				joystickText.setText("R");
+			}else {
+				controlMode = ControlMode.TRANSLATION;
+				joystickText.setText("T");
+			}
+		});
+		
+		joystick.setOnMousePressed(evt -> {
+			mouseX = evt.getScreenX();
+			mouseY = evt.getScreenY();
+		});
+		joystickText.setOnMousePressed(evt -> {
+			mouseX = evt.getScreenX();
+			mouseY = evt.getScreenY();
+		});
+		
+		
+		EventHandler<MouseEvent> mouseeventHandlerDragged = new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent mouseevent) {
+				double dx = mouseevent.getScreenX() - mouseX;
+				double dy = mouseevent.getScreenY() - mouseY;
+				int angle = (int)(Math.toDegrees(Math.atan2(dx, dy))/10)*10;
+				int dist = (int) (Math.min(Math.sqrt(dx*dx+dy*dy), 80));
+				joystick.setTranslateX(dist*Math.sin(Math.toRadians(angle)));
+				joystick.setTranslateY(dist*Math.cos(Math.toRadians(angle)));
+				joystickText.setTranslateX(dist*Math.sin(Math.toRadians(angle)));
+				joystickText.setTranslateY(dist*Math.cos(Math.toRadians(angle)));
+				switch(controlMode) {
+				case TRANSLATION:
+					if(angle > 0) {
+						angle = angle-180;
+					}else {
+						angle = angle+180;
+					}
+					if((dist > 10 && dist != lastdist) || angle != lastangle) {
+						robot.getActuator().speed((int)(60*dist/80), -angle, 0);
+					}else if (dist <= 10) {
+						robot.getActuator().stop();
+					}
+					
+					lastangle = angle;
+					lastdist = dist;
+					break;
+				case ROTATION:
+					if((dist > 10 && dist != lastdist) || angle != lastangle) {
+						robot.getActuator().speed((int)(-dy), 0, (int) -dx/2);
+					}else if (dist <= 10) {
+						robot.getActuator().stop();
+					}
+					
+					break;
+				}
+			}
+		};
+		joystick.setOnMouseDragged(mouseeventHandlerDragged);
+		joystickText.setOnMouseDragged(mouseeventHandlerDragged);
+		
+		joystick.setOnMouseReleased(evt -> {
+			this.joystick.setTranslateX(0);
+			this.joystick.setTranslateY(0);
+			this.joystickText.setTranslateX(0);
+			this.joystickText.setTranslateY(0);
+			robot.getActuator().stop();
+		});
+		joystickText.setOnMouseReleased(evt -> {
+			this.joystick.setTranslateX(0);
+			this.joystick.setTranslateY(0);
+			this.joystickText.setTranslateX(0);
+			this.joystickText.setTranslateY(0);
+			robot.getActuator().stop();
+		});
+		
 	}
 
 	@FXML
 	protected void controlForward(MouseEvent event) {
-		actuator.speed(60,0,0);
+		robot.getActuator().speed(60,0,0);
 	}
 	@FXML
 	protected void controlBackward(MouseEvent event) {
-		actuator.speed(60,180,0);
+		robot.getActuator().speed(60,180,0);
 	}
 	@FXML
 	protected void controlLeft(MouseEvent event) {
-		actuator.speed(60,-90,0);
+		robot.getActuator().speed(60,-90,0);
 	}
 	@FXML
 	protected void controlRight(MouseEvent event) {
-		actuator.speed(60,90,0);
+		robot.getActuator().speed(60,90,0);
 	}
 	@FXML
 	protected void controlTurnLeft(MouseEvent event) {
-		actuator.speed(0, 0, 60);
+		robot.getActuator().speed(0, 0, 60);
 	}
 	@FXML
 	protected void controlTurnRight(MouseEvent event) {
-		actuator.speed(0, 0, -60);
+		robot.getActuator().speed(0, 0, -60);
 	}
 	@FXML
 	protected void controlStop(Event event) {
-		actuator.stop();
+		robot.getActuator().stop();
 		previousKey = null;
 	}
 	
 	@FXML
 	protected void controlKeyInput(KeyEvent ke) {
-		
 		System.out.println("Key Pressed: " + previousKey + "-> " + ke.getCode());
 		if(previousKey == null || previousKey != ke.getCode()) {
 			if(ke.getCode() == KeyCode.W) {
-				actuator.speed(60,0,0);
+				robot.getActuator().speed(60,0,0);
 			} else if(ke.getCode() == KeyCode.S) {
-				actuator.speed(60,180,0);
+				robot.getActuator().speed(60,180,0);
 			} else if(ke.getCode() == KeyCode.A) {
-				actuator.speed(60,-90,0);
+				robot.getActuator().speed(60,-90,0);
 			} else if(ke.getCode() == KeyCode.D) {
-				actuator.speed(60,90,0);
+				robot.getActuator().speed(60,90,0);
 			} else if(ke.getCode() == KeyCode.Q) {
-				actuator.speed(0,0,60);
+				robot.getActuator().speed(0,0,60);
 			} else if(ke.getCode() == KeyCode.E) {
-				actuator.speed(0,0,-60);
+				robot.getActuator().speed(0,0,-60);
 			}
 			previousKey = ke.getCode();
 		}
-		
 	}
 	
 
 	@FXML
 	protected void startCamera(ActionEvent event) {
-		int res = camera.startCameraSocket();
+		int res = robot.getCamera().startCameraSocket();
 		if (res == 0) {
 			this.start_btn.setText("Stop Camera");
 		} 
 		else if(res == 1) {
-			camera.stopCameraSocket();
+			robot.getCamera().stopCameraSocket();
 			this.start_btn.setText("Start Camera");
 		}
 	}
 
 	@FXML
 	protected void startLaser(ActionEvent event) {
-		int res = lsscanner.startLaserscannerSocket();
+		int res = robot.getLsscanner().startLaserscannerSocket();
 		if (res == 0) {
 			this.start_laser_btn.setText("Stop Laser");
 		} 
 		else if(res == 1) {
-			lsscanner.stopLaserscannerSocket();
+			robot.getLsscanner().stopLaserscannerSocket();
 			this.start_laser_btn.setText("Start Laser");
 		}
 	}
@@ -221,9 +281,9 @@ public class FXController {
 	}
 
 	protected void setClosed() {
-		camera.stopCameraSocket();
-		lsscanner.stopLaserscannerSocket();
-		actuator.stopActuatorSocket();
+		robot.getCamera().stopCameraSocket();
+		robot.getLsscanner().stopLaserscannerSocket();
+		robot.getActuator().stopActuatorSocket();
 	}
 
 	public KOOSCanvas getKoosCanvas() {

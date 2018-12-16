@@ -37,6 +37,9 @@ public class Camera {
 	
 	private FXController fxcontroller;
 	
+	private BufferedImage cameraFrame;
+	private Object lock = new Object();
+	
 	public Camera(String ip, int port, FXController fxcontroller) {
 		this.fxcontroller = fxcontroller;
 		this.ipaddress = ip;
@@ -85,12 +88,14 @@ public class Camera {
 								} while (pos < size);
 								String encoded = new String(data);
 								byte[] decoded = Base64.getDecoder().decode(encoded);
-
-								BufferedImage image = ImageIO.read(new ByteArrayInputStream(decoded));
-
-								// convert and show the frame
-								Image imageToShow = SwingFXUtils.toFXImage(image, null);
-								fxcontroller.updateCameraImageView(imageToShow);
+								synchronized (lock) {
+									cameraFrame = ImageIO.read(new ByteArrayInputStream(decoded));
+									cameraFrame = ImageProcessing.process(cameraFrame);
+									// convert and show the frame
+								
+									Image imageToShow = SwingFXUtils.toFXImage(cameraFrame, null);
+									fxcontroller.updateCameraImageView(imageToShow);
+								}
 							}
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
@@ -145,6 +150,13 @@ public class Camera {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		this.cameraActive = false;
+	}
+
+	public BufferedImage getCameraFrame() {
+		synchronized (lock) {
+			return cameraFrame;
 		}
 	}
 }

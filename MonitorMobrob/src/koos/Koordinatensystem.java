@@ -10,6 +10,10 @@ import java.awt.image.*;
  * dar.
  */
 public class Koordinatensystem extends JFrame {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Grafikpanel graf;
 
 	/**
@@ -127,7 +131,6 @@ public class Koordinatensystem extends JFrame {
 		private void drawCross(Graphics2D g) {
 			int w = this.width / 2;
 			int h = this.height / 2;
-			int pad = 0;
 
 			g.setTransform(new AffineTransform());
 			g.setColor(Color.black);
