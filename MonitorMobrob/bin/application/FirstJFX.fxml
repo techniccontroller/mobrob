@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.web.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import koos.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.FXController">
+	<top>
+		<BorderPane onKeyPressed="#controlKeyInput" onKeyReleased="#controlStop" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+			<left>
+				<!-- <Canvas height="600.0" width="800.0" BorderPane.alignment="CENTER">
+					<BorderPane.margin>
+						<Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+					</BorderPane.margin>
+				</Canvas> -->
+				<KOOSCanvas fx:id="koosCanvas" height="600.0"
+					width="800.0" BorderPane.alignment="CENTER">
+					<BorderPane.margin>
+						<Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+					</BorderPane.margin>
+				</KOOSCanvas>
+			</left>
+         <bottom>
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+      				<Button fx:id="start_laser_btn" mnemonicParsing="false" onAction="#startLaser" prefWidth="120.0" text="Start Laser">
+                     <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </HBox.margin>
+      				</Button>
+      				<Button fx:id="start_btn" mnemonicParsing="false" onAction="#startCamera" prefWidth="120.0" text="Start Camera">
+                     <HBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </HBox.margin>
+      				</Button>
+               </children>
+            </HBox>
+         </bottom>
+         <right>
+            <StackPane prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+      				<ImageView fx:id="currentFrame" fitHeight="600.0" fitWidth="800.0" pickOnBounds="true" preserveRatio="true">
+                     <StackPane.margin>
+                        <Insets />
+                     </StackPane.margin>
+      				</ImageView>
+                  <GridPane fx:id="paneControl" maxHeight="140.0" maxWidth="200.0" prefHeight="100.0" prefWidth="200.0" StackPane.alignment="TOP_LEFT">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Button fx:id="btnLeftUp" mnemonicParsing="false" onMousePressed="#controlTurnLeft" onMouseReleased="#controlStop" prefHeight="50.0" prefWidth="50.0" text="Turn Left" textAlignment="CENTER" wrapText="true" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                        <Button fx:id="btnUp" mnemonicParsing="false" onMousePressed="#controlForward" onMouseReleased="#controlStop" prefHeight="50.0" prefWidth="50.0" text="For" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                        <Button fx:id="btnLeft" mnemonicParsing="false" onMousePressed="#controlLeft" onMouseReleased="#controlStop" prefHeight="50.0" prefWidth="50.0" text="Left" textAlignment="CENTER" wrapText="true" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+                        <Button fx:id="btnRight" mnemonicParsing="false" onMousePressed="#controlRight" onMouseReleased="#controlStop" prefHeight="50.0" prefWidth="50.0" text="Right" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+                        <Button fx:id="btnDown" mnemonicParsing="false" onMousePressed="#controlBackward" onMouseReleased="#controlStop" prefHeight="50.0" prefWidth="50.0" text="Back" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+                        <Button fx:id="btnRightUp" mnemonicParsing="false" onMousePressed="#controlTurnRight" onMouseReleased="#controlStop" prefHeight="50.0" prefWidth="50.0" text="Turn Right" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                     </children>
+                     <StackPane.margin>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                     </StackPane.margin>
+                  </GridPane>
+                  <Pane maxHeight="200.0" maxWidth="200.0" prefHeight="200.0" prefWidth="200.0" StackPane.alignment="TOP_RIGHT">
+                     <StackPane.margin>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                     </StackPane.margin>
+                     <children>
+                        <Circle fx:id="joystickBackground" centerX="100.0" centerY="100.0" radius="100.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0">
+                           <fill>
+                              <RadialGradient centerX="0.5" centerY="0.5" radius="0.5">
+                                 <stops>
+                                    <Stop color="#7a70ff9a" />
+                                    <Stop color="#002bff99" offset="1.0" />
+                                 </stops>
+                              </RadialGradient>
+                           </fill>
+                        </Circle>
+                        <Circle fx:id="joystick" layoutX="100.0" layoutY="100.0" radius="30.0" stroke="BLACK" strokeType="INSIDE" />
+                        <Text fx:id="joystickText" fill="#48ff00" layoutX="93.0" layoutY="109.0" strokeType="OUTSIDE" strokeWidth="0.0" text="T">
+                           <font>
+                              <Font name="System Bold" size="24.0" />
+                           </font>
+                        </Text>
+                     </children>
+                  </Pane>
+               </children>
+               <BorderPane.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </BorderPane.margin>
+            </StackPane>
+         </right>
+		</BorderPane>
+	</top>
+</BorderPane>
