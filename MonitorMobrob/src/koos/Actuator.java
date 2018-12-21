@@ -17,27 +17,38 @@ public class Actuator {
 	private OutputStreamWriter outToServerCon;
 	private BufferedReader inFromServerCon;
 	
+	private boolean actuatorActive = false;
+	
 	public Actuator(String ip, int port) {
 		this.ipaddress = ip;
 		this.port = port;
 	}
 	
-	public void startActuatorSocket() {
-		try {
-			if (clientSocketCon == null || clientSocketCon.isClosed()) {
-				clientSocketCon = new Socket(ipaddress, port);
-				System.out.println("Create Control socket...");
-				outToServerCon = new OutputStreamWriter(clientSocketCon.getOutputStream());
-				inFromServerCon = new BufferedReader(new InputStreamReader(clientSocketCon.getInputStream()));
+	public int startActuatorSocket() {
+		if (!this.actuatorActive) {
+		
+			try {
+				if (clientSocketCon == null || clientSocketCon.isClosed()) {
+					clientSocketCon = new Socket(ipaddress, port);
+					System.out.println("Create Control socket...");
+					outToServerCon = new OutputStreamWriter(clientSocketCon.getOutputStream());
+					inFromServerCon = new BufferedReader(new InputStreamReader(clientSocketCon.getInputStream()));
+				}
+				this.actuatorActive = true;
+				return 0;
+	
+			} catch (IOException e) {
+				System.err.println("Not able to open the control connection...");
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("Error");
+				alert.setHeaderText("Control Connection");
+				alert.setContentText("Not able to open the control connection.");
+				alert.showAndWait();
+				this.actuatorActive = false;
+				return -1;
 			}
-
-		} catch (IOException e) {
-			System.err.println("Not able to open the control connection...");
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setTitle("Error");
-			alert.setHeaderText("Control Connection");
-			alert.setContentText("Not able to open the control connection.");
-			alert.showAndWait();
+		}else {
+			return 1;
 		}
 	}
 
@@ -50,7 +61,7 @@ public class Actuator {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
+			this.actuatorActive = false;
 		}
 	}
 	

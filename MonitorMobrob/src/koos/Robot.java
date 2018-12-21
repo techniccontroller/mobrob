@@ -29,7 +29,7 @@ public class Robot {
 	
 	public int initActuator(int port) {
 		actuator = new Actuator(ipaddress, port);
-		actuator.startActuatorSocket();
+		//actuator.startActuatorSocket();
 		return 0;
 	}
 

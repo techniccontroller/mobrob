@@ -104,6 +104,7 @@ public class LSScanner {
 				alert.setHeaderText("Laser Connection");
 				alert.setContentText("Not able to open the laser connection.");
 				alert.showAndWait();
+				this.laserActive = false;
 				return -1;
 			}
 		} else {
