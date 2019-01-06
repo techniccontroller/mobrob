@@ -141,6 +141,7 @@ public class Camera {
 				alert.setHeaderText("Camera Connection");
 				alert.setContentText("Not able to open the camera connection.");
 				alert.showAndWait();
+				this.cameraActive = false;
 				return -1;
 			}
 		} else {

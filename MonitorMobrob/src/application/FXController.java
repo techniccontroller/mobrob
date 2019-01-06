@@ -1,5 +1,6 @@
 package application;
 
+
 import java.util.Optional;
 
 import javafx.event.ActionEvent;
@@ -11,15 +12,19 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
@@ -28,10 +33,6 @@ import koos.Robot;
 import utils.Utils;
 
 public class FXController {
-	@FXML
-	private Button start_btn;
-	@FXML
-	private Button start_laser_btn;
 	@FXML
 	private Button btnLeft;
 	@FXML
@@ -47,6 +48,8 @@ public class FXController {
 	@FXML
 	private GridPane paneControl;
 	@FXML
+	private Pane paneJoystick;
+	@FXML
 	private ImageView currentFrame;
 	@FXML
 	private KOOSCanvas koosCanvas;
@@ -56,6 +59,14 @@ public class FXController {
 	private Circle joystick;
 	@FXML
 	private Circle joystickBackground;
+	@FXML
+	private StackPane koosPane;
+	@FXML
+	private MenuItem menuConRobot;
+	@FXML
+	private MenuItem menuConLaser;
+	@FXML
+	private MenuItem menuConCamera;
 	
 	private Robot robot;
 
@@ -64,11 +75,11 @@ public class FXController {
 	
 	private KeyCode previousKey = null;
 	
-	private long lastTimeOfControl = 0;
 	private int lastangle = 0;
 	private int lastdist = 0;
 	private enum ControlMode{TRANSLATION, ROTATION};
 	private ControlMode controlMode = ControlMode.TRANSLATION;
+	
 	
 	public void setRobot(Robot robot) {
 		this.robot = robot;
@@ -166,6 +177,9 @@ public class FXController {
 			robot.getActuator().stop();
 		});
 		
+		paneControl.setVisible(false);
+		paneJoystick.setVisible(false);
+		
 	}
 
 	@FXML
@@ -224,11 +238,11 @@ public class FXController {
 	protected void startCamera(ActionEvent event) {
 		int res = robot.getCamera().startCameraSocket();
 		if (res == 0) {
-			this.start_btn.setText("Stop Camera");
+			menuConCamera.setText("Disconnect Camera");
 		} 
 		else if(res == 1) {
 			robot.getCamera().stopCameraSocket();
-			this.start_btn.setText("Start Camera");
+			menuConCamera.setText("Connect Camera");
 		}
 	}
 
@@ -236,14 +250,37 @@ public class FXController {
 	protected void startLaser(ActionEvent event) {
 		int res = robot.getLsscanner().startLaserscannerSocket();
 		if (res == 0) {
-			this.start_laser_btn.setText("Stop Laser");
+			menuConLaser.setText("Disconnect Laserscanner");
 		} 
 		else if(res == 1) {
 			robot.getLsscanner().stopLaserscannerSocket();
-			this.start_laser_btn.setText("Start Laser");
+			menuConLaser.setText("Connect Laserscanner");
 		}
+		koosCanvas.clear();
 	}
-
+	
+	@FXML
+	protected void connectRobot(ActionEvent event) {
+		int res = robot.getActuator().startActuatorSocket();
+		if(res == 0) {
+			paneControl.setVisible(true);
+			paneJoystick.setVisible(true);
+			menuConRobot.setText("Disconnect Robot");
+		}
+		else if(res == 1) {
+			robot.getActuator().stopActuatorSocket();
+			paneControl.setVisible(false);
+			paneJoystick.setVisible(false);
+			menuConRobot.setText("Connect Robot");
+		}
+		
+	}
+	
+	@FXML
+	protected void showAbout(ActionEvent event) {
+		System.out.println("About");
+	}
+	
 	public int showServerConfirmation(String type) {
 		Alert alert = new Alert(AlertType.CONFIRMATION);
 		alert.setTitle("Close Driver");

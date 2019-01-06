@@ -34,8 +34,8 @@ public class KOOSCanvas extends Canvas {
 				}
 				
 			}
-			
 		});
+		
 	}
 	
 	public void clear() {

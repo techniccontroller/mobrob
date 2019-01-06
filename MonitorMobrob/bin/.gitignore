@@ -1,5 +1,10 @@
 /application/
 /koos/
 /samples/
+<<<<<<< HEAD
 /utils/
 /myRobCon/
+=======
+/application/
+/koos/
+>>>>>>> refs/remotes/origin/master
