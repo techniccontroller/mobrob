@@ -2,14 +2,14 @@ package myRobCon;
 
 import java.util.LinkedList;
 
-public class myRobSim {
+public class MyRobSim {
 	private String id;
 	private Resolver resolver;
 	private LinkedList<BehaviourGroup> behGroups;
 	private Strategy strategy;
 	
 	
-	public myRobSim(String id) {
+	public MyRobSim(String id) {
 		this.id = id;
 		this.resolver = new Resolver();
 		this.behGroups = new LinkedList<BehaviourGroup>();
