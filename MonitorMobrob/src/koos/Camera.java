@@ -23,66 +23,80 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 
 public class Camera {
-	
+
 	private String ipaddress;
 	private int port;
-	
+
 	private ScheduledExecutorService pool = Executors.newScheduledThreadPool(3);
 	private ScheduledFuture<?> timerCam;
-	
+
 	// Socket
 	private Socket clientSocketCam;
 	private OutputStreamWriter outToServerCam;
 	private InputStreamReader inFromServerCam;
-	
+
 	private boolean cameraActive = false;
-	
+
 	private FXController fxcontroller;
-	
+
 	private BufferedImage cameraFrame;
 	private Object lock = new Object();
-	
+
 	public Camera(String ip, int port, FXController fxcontroller) {
 		this.fxcontroller = fxcontroller;
 		this.ipaddress = ip;
 		this.port = port;
 		displayBlankImage();
 	}
-	
+
 	private void displayBlankImage() {
 		BufferedImage dummy = getBlankImage(640, 480);
 		Image imageToShow = SwingFXUtils.toFXImage(dummy, null);
 		fxcontroller.updateCameraImageView(imageToShow);
 	}
-	
+
 	private BufferedImage getBlankImage(int width, int height) {
-		BufferedImage bImage = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
-		 
+		BufferedImage bImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
 		Graphics2D g = (Graphics2D) bImage.getGraphics();
-		 
+
 		// Clear the background with white
 		g.setBackground(Color.BLACK);
 		g.clearRect(0, 0, width, height);
-		 
+
 		// Write some text
 		g.setColor(Color.WHITE);
-		g.drawString("Camera is OFF", width/2 - 50, height/2 - 20);
-		 
+		g.drawString("Camera is OFF", width / 2 - 50, height / 2 - 20);
+
 		g.dispose();
 		return bImage;
 	}
-	
+
+	public int initCameraSocket() {
+		try {
+			if (clientSocketCam == null || clientSocketCam.isClosed()) {
+				clientSocketCam = new Socket(ipaddress, port);
+				System.out.println("Create Cam socket...");
+				outToServerCam = new OutputStreamWriter(clientSocketCam.getOutputStream());
+				inFromServerCam = new InputStreamReader(clientSocketCam.getInputStream());
+			}
+			return 0;
+		} catch (IOException e) {
+			System.err.println("Not able to open the camera connection...");
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error");
+			alert.setHeaderText("Camera Connection");
+			alert.setContentText("Not able to open the camera connection.");
+			alert.showAndWait();
+			this.cameraActive = false;
+			return -1;
+		}
+	}
+
 	public int startCameraSocket() {
 		if (!this.cameraActive) {
-
-			try {
-				if (clientSocketCam == null || clientSocketCam.isClosed()) {
-					clientSocketCam = new Socket(ipaddress, port);
-					System.out.println("Create Cam socket...");
-					outToServerCam = new OutputStreamWriter(clientSocketCam.getOutputStream());
-					inFromServerCam = new InputStreamReader(clientSocketCam.getInputStream());
-				}
-
+				initCameraSocket();
+				
 				// grab a frame every 33 ms (30 frames/sec)
 				Runnable frameGrabber = new Runnable() {
 
@@ -134,22 +148,12 @@ public class Camera {
 
 				this.cameraActive = true;
 				return 0;
-			} catch (IOException e) {
-				System.err.println("Not able to open the camera connection...");
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setTitle("Error");
-				alert.setHeaderText("Camera Connection");
-				alert.setContentText("Not able to open the camera connection.");
-				alert.showAndWait();
-				this.cameraActive = false;
-				return -1;
-			}
 		} else {
 			return 1;
 
 		}
 	}
-	
+
 	public void stopCameraSocket()
 
 	{
