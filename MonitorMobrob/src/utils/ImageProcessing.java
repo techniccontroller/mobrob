@@ -1,11 +1,10 @@
-package koos;
+package utils;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import utils.Utils;
 
 public class ImageProcessing {
 	public ImageProcessing() {
