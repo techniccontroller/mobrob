@@ -2,14 +2,18 @@ package myRobCon;
 
 public class DesRotVel extends Desire{
 	
-	private double valRotSpeed;
+	private int valRotSpeed;
 	
-	public DesRotVel(double valRotSpeed, double strength) {
+	public DesRotVel(int valRotSpeed, double strength) {
 		super(strength);
 		this.valRotSpeed = valRotSpeed;
 	}
 
-	public double getValRotSpeed() {
+	public int getValRotSpeed() {
 		return valRotSpeed;
+	}
+
+	public void setValRotSpeed(int valRotSpeed) {
+		this.valRotSpeed = valRotSpeed;
 	}
 }

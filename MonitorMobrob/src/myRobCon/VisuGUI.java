@@ -1,10 +1,15 @@
 package myRobCon;
 
 import java.util.Optional;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -22,6 +27,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import koos.KOOSCanvas;
 import utils.Utils;
 
@@ -35,16 +41,30 @@ public class VisuGUI extends Application {
 	private ImageView imageView;
 	private KOOSCanvas koosCanvas;
 	
+	private static VisuGUI appInstance;
+	private static final Lock lock = new ReentrantLock();
+	private static final Condition appStarted = lock.newCondition();
+	private Stage priStage;
+	
 	
 	@Override
 	public void start(Stage primaryStage) {
+		lock.lock();
 		
-		robot = new MyRob("Mob1", "192.168.0.111");
-		robot.setVisu(this);
-		robot.initLaserscanner(1234);
-		robot.initActuator(5054);
-		robot.initCamera(5001);
-		robot.initEGOPoseSensor(5053);
+        try {
+        	/*Sets the JavaFX platform not to exit implicitly. 
+            (e.g. an explicit call to Platform.exit() is required
+            to exit the JavaFX Platform).*/
+        	Platform.setImplicitExit(false);
+        	//records the instance
+            appInstance = this;
+            
+            appStarted.signalAll();
+        } catch(Exception e){
+        	e.printStackTrace();
+        }finally {
+            lock.unlock();
+        }
 		
 		VBox windowPanel = new VBox();
 		BorderPane mainPanel = new BorderPane();
@@ -121,8 +141,47 @@ public class VisuGUI extends Application {
 		Scene scene = new Scene(windowPanel);
 		primaryStage.setTitle("MyRobCon");
 		primaryStage.setScene(scene);
-		primaryStage.show();
+		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			
+			@Override
+			public void handle(WindowEvent event) {
+				robot.shutDown();
+				Platform.exit();
+			}
+		});
+		primaryStage.hide();
+		this.priStage = primaryStage;
 	}
+	
+	/**
+     * Get an instance of the application.
+     * If the application has not already been launched it will be launched.
+     * This method will block the calling thread until the
+     * start method of the application has been invoked and the instance set. 
+     * @return application instance (will not return null).
+     */
+    public static VisuGUI getInstance() throws InterruptedException {
+        lock.lock();
+
+        try {
+            if (appInstance == null) {
+                Thread launchThread = new Thread(
+                        () -> launch(VisuGUI.class), 
+                        "visu-launcher"
+                );
+                launchThread.setDaemon(true);
+                launchThread.start();
+            	System.out.println("Lauch Visu...");
+            	//launch(VisuGUI.class);
+                appStarted.await();
+            }
+        } finally {
+            lock.unlock();
+        }
+
+        return appInstance;
+    }
+	
 	
 	protected void controlKeyInput(KeyEvent ke) {
 		System.out.println("Key Pressed: " + previousKey + "-> " + ke.getCode());
@@ -183,6 +242,10 @@ public class VisuGUI extends Application {
 	
 	public MyRob getRobot() {
 		return robot;
+	}	
+	
+	public void setRobot(MyRob robot) {
+		this.robot = robot;
 	}
 	
 	public VisuMenuBar getMenuBar() {
@@ -201,7 +264,11 @@ public class VisuGUI extends Application {
 		return koosCanvas;
 	}
 
-	public static void main(String[] args) {
-		launch(args);
+	public Stage getStage() {
+		return priStage;
 	}
+	
+	/*public static void main(String[] args) {
+		launch(args);
+	}*/
 }

@@ -1,8 +1,8 @@
 package myRobCon;
 
 public class Desire {
-	private double priority;
-	private double strength;
+	private double priority;		// 0   -> 100
+	private double strength;		// 0.0 -> 1.0
 
 	public Desire(double strength) {
 		this.strength = strength;

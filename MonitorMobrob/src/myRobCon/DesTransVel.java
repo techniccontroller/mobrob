@@ -2,28 +2,28 @@ package myRobCon;
 
 public class DesTransVel extends Desire{
 
-	private double valDirection;
-	private double valSpeed;
+	private int valDirection;
+	private int valSpeed;
 	
-	public DesTransVel(double valDirection, double valSpeed, double strength) {
+	public DesTransVel(int valDirection, int valSpeed, double strength) {
 		super(strength);
 		this.valDirection = valDirection;
 		this.valSpeed = valSpeed;
 	}
 
-	public double getValDirection() {
+	public int getValDirection() {
 		return valDirection;
 	}
 
-	public double getValSpeed() {
+	public int getValSpeed() {
 		return valSpeed;
 	}
 
-	public void setValDirection(double valDirection) {
+	public void setValDirection(int valDirection) {
 		this.valDirection = valDirection;
 	}
 
-	public void setValSpeed(double valSpeed) {
+	public void setValSpeed(int valSpeed) {
 		this.valSpeed = valSpeed;
 	}
 	

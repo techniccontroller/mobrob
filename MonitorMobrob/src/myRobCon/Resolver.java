@@ -16,10 +16,13 @@ public class Resolver {
 	private ScheduledFuture<?> task;
 	private Object lock = new Object();
 	
+	private DesTransVel lastDesTransVel;
+	
 	public Resolver() {
 		this.lstBehaviours = new LinkedList<Behaviour>();
 		this.lstDesRotVel = new LinkedList<DesRotVel>();
 		this.lstDesTransVel = new LinkedList<DesTransVel>();
+		this.lastDesTransVel = new DesTransVel(0, 0, 0);
 	}
 	
 	public void addDesire(Desire desire) {
@@ -52,16 +55,16 @@ public class Resolver {
 			
 			@Override
 			public void run() {
+				robot.getLsscanner().drawRawScanPoints();
+				
 				lstDesRotVel.clear();
 				lstDesTransVel.clear();
-				
-				System.out.println(lstBehaviours.size());
 				
 				// Run fire() Methode of all active Behaviours
 				lstBehaviours.stream().forEach(beh -> beh.fire());
 				
-				lstDesTransVel.sort(Comparator.comparingDouble(Desire::getPriority));
-				
+				lstDesTransVel.sort(Comparator.comparingDouble(Desire::getPriority).reversed());
+				lstDesTransVel.forEach(d -> System.out.println(d.getValSpeed()));
 				System.out.println(lstDesTransVel.size());
 				
 				DesTransVel resultDes;
@@ -73,8 +76,8 @@ public class Resolver {
 					DesTransVel tempDes = new DesTransVel(0, 0, 0);
 					for(int k = 0; k < lstDesTransVel.size(); k++) {
 						if(lstDesTransVel.get(k).getPriority() == lstDesTransVel.get(i).getPriority()) {
-							tempDes.setValDirection(lstDesTransVel.get(k).getValDirection() * lstDesTransVel.get(k).getStrength());
-							tempDes.setValSpeed(lstDesTransVel.get(k).getValSpeed() * lstDesTransVel.get(k).getStrength());
+							tempDes.setValDirection((int)(lstDesTransVel.get(k).getValDirection() * lstDesTransVel.get(k).getStrength()));
+							tempDes.setValSpeed((int)(lstDesTransVel.get(k).getValSpeed() * lstDesTransVel.get(k).getStrength()));
 							tempDes.setStrength(lstDesTransVel.get(k).getStrength());
 							lastNumDes++;
 						}
@@ -86,10 +89,15 @@ public class Resolver {
 					i = i + lastNumDes;
 				}
 				System.out.println("Output to Robot for DesTransVel -> dir:" + resultDes.getValDirection() + ", s: " + resultDes.getValSpeed());
+				if(lastDesTransVel.getValSpeed() != resultDes.getValSpeed() || lastDesTransVel.getValDirection() != resultDes.getValDirection()) {
+					robot.getActuator().speed(resultDes.getValSpeed(), resultDes.getValDirection(), 0);
+				}
+				lastDesTransVel.setValSpeed(resultDes.getValSpeed());
+				lastDesTransVel.setValDirection(resultDes.getValDirection());
 			}
 		};
 		
-		task = pool.scheduleAtFixedRate(resolverTask, 0, 1000, TimeUnit.MILLISECONDS);
+		task = pool.scheduleAtFixedRate(resolverTask, 0, 100, TimeUnit.MILLISECONDS);
 	}
 	
 	public void stopWorking() {
@@ -97,5 +105,9 @@ public class Resolver {
 			// stop the timer
 			this.task.cancel(true);
 		}
+	}
+
+	public void setRobot(MyRob robot) {
+		this.robot = robot;
 	}
 }

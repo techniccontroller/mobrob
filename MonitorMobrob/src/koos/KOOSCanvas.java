@@ -102,8 +102,20 @@ public class KOOSCanvas extends Canvas {
 			gc.fillOval(((x-width/2) * scale), ((y-height/2) * scale), (width * scale), (height * scale));
 	}
 	
-	private void drawCircle(double radius) {
+	private void drawCentricCircle(double radius) {
 		gc.strokeOval(0-radius, 0-radius, radius*2, radius*2);
+	}
+	
+	public void drawLine(double x1, double y1, double x2, double y2, double width, Color color) {
+		gc.setStroke(color);
+		gc.setLineWidth(width);
+		gc.strokeLine(x1 * scale, y1 * scale, x2 * scale, y2 * scale);
+	}
+	
+	public void drawArc(double x, double y, double radius, double startAngle, double endAngle, double width, Color color) {
+		gc.setStroke(color);
+		gc.setLineWidth(width);
+		gc.strokeArc((x-radius) * scale, (y-radius) * scale, radius*2 * scale, radius*2 * scale, -startAngle, startAngle - endAngle, ArcType.OPEN);
 	}
 	
 	public void drawCross() {
@@ -127,7 +139,7 @@ public class KOOSCanvas extends Canvas {
 				gc.setTransform(0, -1, 1, 0, getWidth()/2, getHeight()/2);
 				gc.setStroke(Color.BLACK);
 				gc.setLineWidth(1);
-				drawCircle(i*scale);
+				drawCentricCircle(i*scale);
 				// labeling x-Axis
 				gc.setTransform(new Affine());
 				gc.fillText("" + i, lenAxisY - 50, lenAxisX - i*scale + 5);

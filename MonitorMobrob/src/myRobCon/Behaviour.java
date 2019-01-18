@@ -2,7 +2,7 @@ package myRobCon;
 
 public abstract class Behaviour {
 	private String name;
-	private MyRob robot;
+	protected MyRob robot;
 	private Resolver resolver;
 	private double priority;
 	private BehaviourGroup currentBehaviourGroup;

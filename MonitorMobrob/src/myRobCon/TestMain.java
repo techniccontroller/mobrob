@@ -1,25 +1,22 @@
 package myRobCon;
 
+import javafx.application.Application;
+
 public class TestMain {
 	
 	public static void main(String[] args) {
-		MyRobSim robot = new MyRobSim("MOBROB");
+		
+		MyRob robot = new MyRob("Mob1", "192.168.0.111");
 		
 		BehaviourGroup dock = new BehaviourGroup("Dock");
 		BehConstTransVel cv = new BehConstTransVel("ConstVel", 40);
+		BehLimFor lv = new BehLimFor("limit", 300, 500, 20);
 		dock.add(cv, 50);
+		dock.add(lv, 90);
 		robot.add(dock);
 		
-		robot.run();
-		
-		try {
-			Thread.sleep(10000);
-			robot.stop();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		//robot.run();
+		robot.showGUI();
 		
 	}
 
