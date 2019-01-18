@@ -11,6 +11,7 @@ public class LSScanPoint{
 		this.dist = Float.valueOf(value.split(",")[1]);
 		this.x = dist * Math.cos(Math.toRadians(angle));
 		this.y = dist * Math.sin(Math.toRadians(angle));
+		this.angle = normalizeAngle(this.angle);
 	}
 	
 	public LSScanPoint(double x, double y) {
@@ -18,6 +19,7 @@ public class LSScanPoint{
 		this.y = y;
 		this.angle = Math.toDegrees(Math.atan2(y, x));
 		this.dist = Math.sqrt(this.x*this.x + this.y + this.y);
+		this.angle = normalizeAngle(this.angle);
 	}
 
 	public double getAngle() {
@@ -38,5 +40,12 @@ public class LSScanPoint{
 	
 	public static double distance(LSScanPoint p1, LSScanPoint p2) {
 		return Math.sqrt((p1.getX()-p2.getX())*(p1.getX()-p2.getX()) + (p1.getY()-p2.getY())*(p1.getY()-p2.getY()));
+	}
+	
+	public static double normalizeAngle(double angle) {
+		double newAngle = angle;
+	    while (newAngle <= -180) newAngle += 360;
+	    while (newAngle > 180) newAngle -= 360;
+	    return newAngle;
 	}
 }
