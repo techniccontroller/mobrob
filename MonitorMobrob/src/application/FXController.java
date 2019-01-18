@@ -273,7 +273,6 @@ public class FXController {
 			paneJoystick.setVisible(false);
 			menuConRobot.setText("Connect Robot");
 		}
-		
 	}
 	
 	@FXML

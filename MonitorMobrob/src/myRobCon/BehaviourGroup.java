@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 public class BehaviourGroup {
 	private String name;
+	private MyRob robot;
 	private LinkedList<BehaviourCapsula> lstBehaviours;
 	private Resolver resolver;
 	private boolean success;
@@ -42,7 +43,14 @@ public class BehaviourGroup {
 		this.error = error;
 	}
 
+	public void setRobot(MyRob robot) {
+		this.robot = robot;
+		lstBehaviours.stream().forEach(behCap -> behCap.getBehaviour().setRobot(robot));
+	}
+
 	public void add(Behaviour behaviour, double priority) {
+		behaviour.setRobot(robot);
+		behaviour.setResolver(resolver);
 		lstBehaviours.add(new BehaviourCapsula(behaviour, priority));
 	}
 

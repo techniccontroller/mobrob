@@ -2,6 +2,7 @@ package myRobCon;
 
 public abstract class Behaviour {
 	private String name;
+	private MyRob robot;
 	private Resolver resolver;
 	private double priority;
 	private BehaviourGroup currentBehaviourGroup;
@@ -14,6 +15,10 @@ public abstract class Behaviour {
 	
 	public void setResolver(Resolver resolver) {
 		this.resolver = resolver;
+	}
+
+	public void setRobot(MyRob robot) {
+		this.robot = robot;
 	}
 
 	public void setPriority(double priority) {

@@ -8,9 +8,10 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class Resolver {
-	LinkedList<DesTransVel> lstDesTransVel;
-	LinkedList<DesRotVel> lstDesRotVel;
-	LinkedList<Behaviour> lstBehaviours;
+	private MyRob robot;
+	private LinkedList<DesTransVel> lstDesTransVel;
+	private LinkedList<DesRotVel> lstDesRotVel;
+	private LinkedList<Behaviour> lstBehaviours;
 	private ScheduledExecutorService pool = Executors.newScheduledThreadPool(1);
 	private ScheduledFuture<?> task;
 	private Object lock = new Object();

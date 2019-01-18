@@ -79,6 +79,21 @@ public class KOOSCanvas extends Canvas {
 		gc.fillArc(180, 30, 30, 30, 45, 270, ArcType.ROUND);
 	}
 	
+	public void drawRobot(double x, double y, double angle) {
+		gc.setFill(Color.YELLOW);
+		gc.setStroke(Color.BROWN);
+		gc.setLineWidth(2);
+		double height = 200;
+		double width = 200;
+		double lenAxisY = getWidth() / 2;
+		double lenAxisX = getHeight() / 2;
+		if(x*scale > -lenAxisX && x*scale < lenAxisX &&  y*scale > -lenAxisY && y*scale < lenAxisY) {
+			gc.fillOval(((x-width/2) * scale), ((y-height/2) * scale), (width * scale), (height * scale));
+			gc.strokeLine(x*scale, y*scale, (x+Math.sin(angle)*height)*scale, (y+Math.cos(angle)*height)*scale);
+		}
+			
+	}
+	
 	public void drawDataPoint(double x, double y, double width, double height, Color color) {
 		gc.setFill(color);
 		double lenAxisY = getWidth() / 2;
@@ -159,5 +174,9 @@ public class KOOSCanvas extends Canvas {
 				gc.strokeLine(-i, -len, -i, len);
 			}
 		}
+	}
+
+	public void setXmax(double xmax) {
+		this.xmax = xmax;
 	}
 }
