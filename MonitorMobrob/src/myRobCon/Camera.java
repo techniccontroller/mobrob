@@ -148,7 +148,7 @@ public class Camera {
 			if (timerCam != null) {
 				while (!timerCam.isDone());
 			}
-			if (!clientSocketCam.isClosed()) {
+			if (clientSocketCam != null && !clientSocketCam.isClosed()) {
 				if (visu.showServerConfirmation("Camera") == 1) {
 					outToServerCam.write("closeDriver");
 					outToServerCam.flush();

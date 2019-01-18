@@ -115,7 +115,7 @@ public class LSScanner {
 				while (!timerLS.isDone())
 					;
 			}
-			if (!clientSocketLS.isClosed()) {
+			if (clientSocketLS != null && !clientSocketLS.isClosed()) {
 				if (visu.showServerConfirmation("Laser") == 1) {
 					outToServerLS.write("closeDriver");
 					outToServerLS.flush();
