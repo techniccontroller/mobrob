@@ -29,6 +29,7 @@ public class LSScanner {
 
 	private ScheduledExecutorService pool = Executors.newScheduledThreadPool(3);
 	private ScheduledFuture<?> timerLS;
+	private ScheduledFuture<?> displayLS;
 
 	private Socket clientSocketLS;
 	private OutputStreamWriter outToServerLS;
@@ -106,6 +107,20 @@ public class LSScanner {
 			return 0;
 		} else {
 			return 1;
+		}
+	}
+	
+	public void startDisplayThread() {
+		if(displayLS == null || displayLS.isDone()) {
+			displayLS = pool.scheduleAtFixedRate(() ->{
+				drawRawScanPoints();
+			}, 0, 200, TimeUnit.MILLISECONDS);
+		}
+	}
+	
+	public void stopDisplayThread() {
+		if(displayLS != null || !displayLS.isDone()) {
+			displayLS.cancel(true);
 		}
 	}
 

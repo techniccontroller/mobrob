@@ -59,8 +59,10 @@ public class VisuMenuBar extends MenuBar {
 		int res = robot.getLsscanner().initLaserscannerSocket();
 		if (res == 0) {
 			robot.getLsscanner().startLaserscannerThread();
+			robot.getLsscanner().startDisplayThread();
 			menuConLaser.setText("Disconnect Laserscanner");
 		} else if (res == 1) {
+			robot.getLsscanner().stopDisplayThread();
 			robot.getLsscanner().stopLaserscannerThread();
 			robot.getLsscanner().closeLaserSocket();
 			menuConLaser.setText("Connect Laserscanner");
