@@ -16,6 +16,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
+import myRobCon.KOOSCanvas;
 
 public class LSScanner {
 	

@@ -28,7 +28,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import koos.KOOSCanvas;
 import utils.Utils;
 
 public class VisuGUI extends Application {

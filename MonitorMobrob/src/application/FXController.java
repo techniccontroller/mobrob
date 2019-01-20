@@ -28,8 +28,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
-import koos.KOOSCanvas;
 import koos.Robot;
+import myRobCon.KOOSCanvas;
 import utils.Utils;
 
 public class FXController {
