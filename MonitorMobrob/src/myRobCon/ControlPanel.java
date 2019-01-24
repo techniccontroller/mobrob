@@ -42,35 +42,37 @@ public class ControlPanel extends BorderPane{
 		this.robot = myrob;
 		gridPane = new GridPane();
 		
-		btnLeftUp = new Button("Turn Left");
+		btnLeftUp = new Button("Turn L [Q]");
 		btnLeftUp.setOnMousePressed(this::controlTurnLeft);
 		btnLeftUp.setOnMouseReleased(this::controlStop);
 		presetButton(btnLeftUp, 0, 0);
 		
-		btnUp = new Button("For");
+		btnUp = new Button("For [W]");
 		btnUp.setOnMousePressed(this::controlForward);
 		btnUp.setOnMouseReleased(this::controlStop);
 		presetButton(btnUp, 1, 0);
 		
-		btnLeft = new Button("Left");
+		btnRightUp = new Button("Turn R [E]");
+		btnRightUp.setOnMousePressed(this::controlTurnRight);
+		btnRightUp.setOnMouseReleased(this::controlStop);
+		presetButton(btnRightUp, 2, 0);
+		
+		btnLeft = new Button("Left [A]");
 		btnLeft.setOnMousePressed(this::controlLeft);
 		btnLeft.setOnMouseReleased(this::controlStop);
-		presetButton(btnLeft, 2, 0);
+		presetButton(btnLeft, 0, 1);
 		
-		btnRight = new Button("Right");
+		btnRight = new Button("Right [D]");
 		btnRight.setOnMousePressed(this::controlRight);
 		btnRight.setOnMouseReleased(this::controlStop);
-		presetButton(btnRight, 0, 1);
+		presetButton(btnRight, 2, 1);
 		
-		btnDown = new Button("Back");
+		btnDown = new Button("Back [S]");
 		btnDown.setOnMousePressed(this::controlBackward);
 		btnDown.setOnMouseReleased(this::controlStop);
 		presetButton(btnDown, 1, 1);
 		
-		btnRightUp = new Button("Turn Right");
-		btnRightUp.setOnMousePressed(this::controlTurnRight);
-		btnRightUp.setOnMouseReleased(this::controlStop);
-		presetButton(btnRightUp, 2, 1);
+		
 		
 		gridPane.setHgap(5);
 		gridPane.setVgap(5);
@@ -99,10 +101,10 @@ public class ControlPanel extends BorderPane{
 	}
 	
 	public void presetButton(Button btn, int col, int row) {
-		btn.setPrefHeight(50.0);
-		btn.setPrefWidth(50.0);
-		btn.setMinHeight(50.0);
-		btn.setMinWidth(50.0);
+		btn.setPrefHeight(55.0);
+		btn.setPrefWidth(55.0);
+		btn.setMinHeight(55.0);
+		btn.setMinWidth(55.0);
 		btn.setTextAlignment(TextAlignment.CENTER);
 		btn.setWrapText(true);
 		gridPane.add(btn, col, row);
