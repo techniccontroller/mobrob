@@ -17,14 +17,19 @@ public class Resolver {
 	private ScheduledFuture<?> task;
 	private Object lock = new Object();
 	
-	private DesTransVel lastDesTransVel;
+	private int lastTransVel;
+	private int lastTransDir;
+	private int lastRotVel;
 	
 	public Resolver() {
 		this.lstBehaviours = new LinkedList<Behaviour>();
 		this.lstDesRotVel = new LinkedList<DesRotVel>();
 		this.lstDesTransVel = new LinkedList<DesTransVel>();
 		this.lstDesTransDir = new LinkedList<DesTransDir>();
-		this.lastDesTransVel = new DesTransVel(0, 0);
+		
+		this.lastTransVel = 0;
+		this.lastTransDir = 0;
+		this.lastRotVel = 0;
 	}
 	
 	public void addDesire(Desire<?> desire) {
@@ -64,44 +69,70 @@ public class Resolver {
 				
 				lstDesRotVel.clear();
 				lstDesTransVel.clear();
+				lstDesTransDir.clear();
 				
 				// Run fire() Methode of all active Behaviours
 				lstBehaviours.stream().forEach(beh -> beh.fire());
 				
-				lstDesTransVel.sort(Comparator.comparingDouble(DesTransVel::getPriority).reversed());
-				System.out.println("Desire-Values (TransVel):");
-				lstDesTransVel.forEach(d -> System.out.println(d.getValue()));
-				System.out.println("Size of DesireList (TransVel): " + lstDesTransVel.size());
 				
-				DesTransVel resultDes;
-				resultDes = new DesTransVel(0, 0);
-				int lastNumDes = 0;
-				
-				for(int i = 0; i < lstDesTransVel.size() && resultDes.getStrength() < 1 ;) {
-					lastNumDes = 0;
-					DesTransVel tempDes = new DesTransVel(0, 0);
-					for(int k = 0; k < lstDesTransVel.size(); k++) {
-						if(lstDesTransVel.get(k).getPriority() == lstDesTransVel.get(i).getPriority()) {
-							tempDes.setValue((int)(lstDesTransVel.get(k).getValue() * lstDesTransVel.get(k).getStrength()));
-							tempDes.setStrength(lstDesTransVel.get(k).getStrength());
-							lastNumDes++;
-						}
+				if(lstDesTransVel.size() > 0 || lstDesTransDir.size() > 0 || lstDesRotVel.size() > 0) {
+					int outputTransVel = resolveNumber(lstDesTransVel).intValue();
+					int outputTransDir = resolveNumber(lstDesTransDir).intValue();
+					int outputRotVel = resolveNumber(lstDesRotVel).intValue();
+					
+					if(lastTransVel != outputTransVel || lastTransDir != outputTransDir || lastRotVel != outputRotVel) {
+						robot.getActuator().speed(outputTransVel, outputTransDir, outputRotVel);
 					}
-					tempDes.setStrength(tempDes.getStrength()/lastNumDes);
-					resultDes.setValue(resultDes.getValue() + tempDes.getValue());
-					resultDes.setStrength(resultDes.getStrength() + tempDes.getStrength());
-					i = i + lastNumDes;
+					
+					lastTransVel = outputTransVel;
+					lastTransDir = outputTransDir;
+					lastRotVel = outputRotVel;
 				}
-				System.out.println("Output to Robot (TransVel): " + resultDes.getValue()/resultDes.getStrength());
-				if(lastDesTransVel.getValue() != resultDes.getValue() || lastDesTransVel.getStrength() != resultDes.getStrength()) {
-					robot.getActuator().speed((int)(resultDes.getValue()/resultDes.getStrength()), 0, 0);
-				}
-				lastDesTransVel.setValue(resultDes.getValue());
-				lastDesTransVel.setStrength(resultDes.getStrength());
 			}
 		};
 		
 		task = pool.scheduleAtFixedRate(resolverTask, 0, 100, TimeUnit.MILLISECONDS);
+	}
+	
+	void test(Desire<?> test) {
+		
+	}
+	
+	static Number resolveNumber(LinkedList<? extends Desire<? extends Number>> lstDesire){
+		Number outputValue = 0;
+		
+		if(lstDesire.size() > 0) {
+			lstDesire.sort(Comparator.comparingDouble(Desire<? extends Number>::getPriority).reversed());
+			System.out.println("Desire: " + lstDesire.getLast().getClass().getName());
+			System.out.print("\tList: [ ");
+			lstDesire.forEach(d -> System.out.print(d.getValue() + " "));
+			System.out.println("]");
+			
+			
+			Desire<Number> resultDes;
+			resultDes = new Desire<Number>(0, 0);
+			int lastNumDes = 0;
+			
+			for(int i = 0; i < lstDesire.size() && resultDes.getStrength() < 1 ;) {
+				lastNumDes = 0;
+				Desire<Number> tempDes = new Desire<Number>(0, 0);
+				for(int k = 0; k < lstDesire.size(); k++) {
+					if(lstDesire.get(k).getPriority() == lstDesire.get(i).getPriority()) {
+						tempDes.setValue((int)(lstDesire.get(k).getValue().doubleValue() * lstDesire.get(k).getStrength()));
+						tempDes.setStrength(lstDesire.get(k).getStrength());
+						lastNumDes++;
+					}
+				}
+				tempDes.setStrength(tempDes.getStrength()/lastNumDes);
+				resultDes.setValue(resultDes.getValue().doubleValue() + tempDes.getValue().doubleValue());
+				resultDes.setStrength(resultDes.getStrength() + tempDes.getStrength());
+				i = i + lastNumDes;
+			}
+			
+			outputValue = resultDes.getValue().doubleValue()/resultDes.getStrength();
+			System.out.println("\tOutput: " + outputValue);
+		}
+		return outputValue;
 	}
 	
 	public void stopWorking() {

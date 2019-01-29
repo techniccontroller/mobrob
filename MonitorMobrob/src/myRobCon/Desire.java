@@ -1,6 +1,6 @@
 package myRobCon;
 
-public class Desire<T> {
+public class Desire<T extends Number> {
 	private double priority;		// 0   -> 100
 	private double strength;		// 0.0 -> 1.0
 	private T value;
