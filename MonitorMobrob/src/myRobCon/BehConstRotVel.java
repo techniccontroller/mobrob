@@ -11,7 +11,6 @@ public class BehConstRotVel extends Behaviour {
 
 	@Override
 	public void fire() {
-		System.out.println("new Desire Rotation: " + rotVel);
 		addDesire(new DesRotVel(rotVel, 0.5));
 	}
 
