@@ -19,10 +19,10 @@ public class BehLimFor extends Behaviour{
 		
 		if(distanceFront > 0) {
 			if(distanceFront < stopdistance) {
-				addDesire(new DesTransVel(0, 0, 1.0));
+				addDesire(new DesTransVel(0, 1.0));
 			}
 			else if(distanceFront < slowdistance) {
-				addDesire(new DesTransVel(0, slowspeed, 1.0));
+				addDesire(new DesTransVel(slowspeed, 1.0));
 			}
 		}
 	}

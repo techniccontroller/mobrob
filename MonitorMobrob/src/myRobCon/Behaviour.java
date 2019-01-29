@@ -33,7 +33,7 @@ public abstract class Behaviour {
 		this.currentBehaviourGroup = currentBehaviourGroup;
 	}
 
-	protected void addDesire(Desire desire) {
+	protected void addDesire(Desire<?> desire) {
 		desire.setPriority(priority);
 		resolver.addDesire(desire);
 	}

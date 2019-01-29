@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 public class Resolver {
 	private MyRob robot;
 	private LinkedList<DesTransVel> lstDesTransVel;
+	private LinkedList<DesTransDir> lstDesTransDir;
 	private LinkedList<DesRotVel> lstDesRotVel;
 	private LinkedList<Behaviour> lstBehaviours;
 	private ScheduledExecutorService pool = Executors.newScheduledThreadPool(1);
@@ -22,12 +23,16 @@ public class Resolver {
 		this.lstBehaviours = new LinkedList<Behaviour>();
 		this.lstDesRotVel = new LinkedList<DesRotVel>();
 		this.lstDesTransVel = new LinkedList<DesTransVel>();
-		this.lastDesTransVel = new DesTransVel(0, 0, 0);
+		this.lstDesTransDir = new LinkedList<DesTransDir>();
+		this.lastDesTransVel = new DesTransVel(0, 0);
 	}
 	
-	public void addDesire(Desire desire) {
+	public void addDesire(Desire<?> desire) {
 		if(desire instanceof DesTransVel) {
 			lstDesTransVel.add((DesTransVel) desire);
+		}
+		else if(desire instanceof DesTransDir) {
+			lstDesTransDir.add((DesTransDir) desire);
 		}
 		else if(desire instanceof DesRotVel) {
 			lstDesRotVel.add((DesRotVel) desire);
@@ -63,37 +68,36 @@ public class Resolver {
 				// Run fire() Methode of all active Behaviours
 				lstBehaviours.stream().forEach(beh -> beh.fire());
 				
-				lstDesTransVel.sort(Comparator.comparingDouble(Desire::getPriority).reversed());
-				lstDesTransVel.forEach(d -> System.out.println(d.getValSpeed()));
-				System.out.println(lstDesTransVel.size());
+				lstDesTransVel.sort(Comparator.comparingDouble(DesTransVel::getPriority).reversed());
+				System.out.println("Desire-Values (TransVel):");
+				lstDesTransVel.forEach(d -> System.out.println(d.getValue()));
+				System.out.println("Size of DesireList (TransVel): " + lstDesTransVel.size());
 				
 				DesTransVel resultDes;
-				resultDes = new DesTransVel(0, 0, 0);
+				resultDes = new DesTransVel(0, 0);
 				int lastNumDes = 0;
 				
 				for(int i = 0; i < lstDesTransVel.size() && resultDes.getStrength() < 1 ;) {
 					lastNumDes = 0;
-					DesTransVel tempDes = new DesTransVel(0, 0, 0);
+					DesTransVel tempDes = new DesTransVel(0, 0);
 					for(int k = 0; k < lstDesTransVel.size(); k++) {
 						if(lstDesTransVel.get(k).getPriority() == lstDesTransVel.get(i).getPriority()) {
-							tempDes.setValDirection((int)(lstDesTransVel.get(k).getValDirection() * lstDesTransVel.get(k).getStrength()));
-							tempDes.setValSpeed((int)(lstDesTransVel.get(k).getValSpeed() * lstDesTransVel.get(k).getStrength()));
+							tempDes.setValue((int)(lstDesTransVel.get(k).getValue() * lstDesTransVel.get(k).getStrength()));
 							tempDes.setStrength(lstDesTransVel.get(k).getStrength());
 							lastNumDes++;
 						}
 					}
 					tempDes.setStrength(tempDes.getStrength()/lastNumDes);
-					resultDes.setValDirection(resultDes.getValDirection() + tempDes.getValDirection());
-					resultDes.setValSpeed(resultDes.getValSpeed() + tempDes.getValSpeed());
+					resultDes.setValue(resultDes.getValue() + tempDes.getValue());
 					resultDes.setStrength(resultDes.getStrength() + tempDes.getStrength());
 					i = i + lastNumDes;
 				}
-				System.out.println("Output to Robot for DesTransVel -> dir:" + resultDes.getValDirection() + ", s: " + resultDes.getValSpeed());
-				if(lastDesTransVel.getValSpeed() != resultDes.getValSpeed() || lastDesTransVel.getValDirection() != resultDes.getValDirection()) {
-					robot.getActuator().speed(resultDes.getValSpeed(), resultDes.getValDirection(), 0);
+				System.out.println("Output to Robot (TransVel): " + resultDes.getValue()/resultDes.getStrength());
+				if(lastDesTransVel.getValue() != resultDes.getValue() || lastDesTransVel.getStrength() != resultDes.getStrength()) {
+					robot.getActuator().speed((int)(resultDes.getValue()/resultDes.getStrength()), 0, 0);
 				}
-				lastDesTransVel.setValSpeed(resultDes.getValSpeed());
-				lastDesTransVel.setValDirection(resultDes.getValDirection());
+				lastDesTransVel.setValue(resultDes.getValue());
+				lastDesTransVel.setStrength(resultDes.getStrength());
 			}
 		};
 		

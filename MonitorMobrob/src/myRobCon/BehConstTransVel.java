@@ -10,8 +10,8 @@ public class BehConstTransVel extends Behaviour {
 
 	@Override
 	public void fire() {
-		System.out.println("new Desire Translation: " + transVel);
-		addDesire(new DesTransVel(0, transVel, 1.0));
+		addDesire(new DesTransVel(transVel, 0.5));
+		addDesire(new DesTransDir(0, 0.5));
 	}
 	
 }
