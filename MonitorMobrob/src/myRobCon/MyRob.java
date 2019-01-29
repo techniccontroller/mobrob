@@ -109,6 +109,11 @@ public class MyRob {
 		this.behGroups.add(behGroup);
 	}
 	
+	public void add(Strategy strategy) {
+		strategy.setRobot(this);
+		this.strategy = strategy;
+	}
+	
 	public void run() {
 		if(camera != null) {
 			logOnVisu("Connecting Camera ...");
@@ -135,7 +140,7 @@ public class MyRob {
 				logOnVisu("not connected\n");
 			}
 		}
-		
+		resolver.setStrategy(strategy);
 		if(strategy == null && behGroups.size() > 0) {
 			behGroups.get(0).activateExclusive();
 		}

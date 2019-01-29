@@ -17,6 +17,7 @@ public class Resolver {
 	private LinkedList<Behaviour> lstBehaviours;
 	private ScheduledExecutorService pool = Executors.newScheduledThreadPool(1);
 	private ScheduledFuture<?> task;
+	private Strategy strategy;
 	private Object lock = new Object();
 	
 	private int lastTransVel;
@@ -32,6 +33,8 @@ public class Resolver {
 		this.lastTransVel = 0;
 		this.lastTransDir = 0;
 		this.lastRotVel = 0;
+		
+		this.strategy = null;
 	}
 	
 	public void addDesire(Desire<?> desire) {
@@ -67,6 +70,10 @@ public class Resolver {
 			
 			@Override
 			public void run() {
+				if(strategy != null) {
+					strategy.plan();
+				}
+				
 				robot.getLsscanner().drawRawScanPoints();
 				
 				lstDesRotVel.clear();
@@ -94,10 +101,6 @@ public class Resolver {
 		};
 		
 		task = pool.scheduleAtFixedRate(resolverTask, 0, 100, TimeUnit.MILLISECONDS);
-	}
-	
-	void test(Desire<?> test) {
-		
 	}
 	
 	static Number resolveNumber(LinkedList<? extends Desire<? extends Number>> lstDesire){
@@ -146,5 +149,9 @@ public class Resolver {
 
 	public void setRobot(MyRob robot) {
 		this.robot = robot;
+	}
+	
+	public void setStrategy(Strategy strategy) {
+		this.strategy = strategy;
 	}
 }
