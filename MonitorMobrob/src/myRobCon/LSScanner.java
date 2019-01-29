@@ -36,7 +36,10 @@ public class LSScanner {
 	private BufferedReader inFromServerLS;
 
 	private boolean laserActive = false;
+	private boolean dataReady = false;
 	private Object lock = new Object();
+
+	private int skipScansNum = 2;
 
 	public LSScanner(String ip, int port) {
 		this.ipaddress = ip;
@@ -69,6 +72,9 @@ public class LSScanner {
 	public int startLaserscannerThread() {
 		if (timerLS == null || timerLS.isDone()) {
 			initLaserscannerSocket();
+			scanpoints.clear();
+			clusters.clear();
+			skipScansNum = 2;
 			Runnable scanGrabber = new Runnable() {
 
 				@Override
@@ -79,23 +85,15 @@ public class LSScanner {
 							outToServerLS.write(message);
 							outToServerLS.flush();
 							String data = inFromServerLS.readLine();
-							synchronized (lock) {
-								addRawData(data);
-								/*
-								 * Platform.runLater(new Runnable() {
-								 * 
-								 * @Override public void run() { visu.getKoosCanvas().clear();
-								 * getScanpoints().stream().forEach(sp -> visu.getKoosCanvas()
-								 * .drawDataPoint(sp.getX(), sp.getY(), 20, 20, Color.WHITE));
-								 * 
-								 * getClusters().stream().forEach(c -> { LSScanPoint s = c.getMiddlePoint();
-								 * visu.getKoosCanvas().drawDataPoint(s.getX(), s.getY(), 50, 50, Color.RED);
-								 * });
-								 * 
-								 * visu.getKoosCanvas().drawDataPoint(200, 300, 50, 50, Color.YELLOW);
-								 * visu.getKoosCanvas().drawDataPoint(2000, -300, 100, 100, Color.YELLOW); } });
-								 */
+							if (skipScansNum == 0) {
+								synchronized (lock) {
+									addRawData(data);
+									lock.notifyAll();
+								}
+							}else {
+								skipScansNum--;
 							}
+
 						}
 					} catch (IOException e) {
 						System.err.println("Error while reading laser stream: " + e.getMessage());
@@ -104,22 +102,36 @@ public class LSScanner {
 
 			};
 			this.timerLS = this.pool.scheduleAtFixedRate(scanGrabber, 0, 200, TimeUnit.MILLISECONDS);
+			System.out.println("Wait for ready Data of Laserscanner ...");
+			synchronized (lock) {
+				dataReady = false;
+				while(!dataReady) {
+					try {
+						lock.wait(2000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			
+			System.out.println("Data is ready!");
 			return 0;
 		} else {
 			return 1;
 		}
 	}
-	
+
 	public void startDisplayThread() {
-		if(displayLS == null || displayLS.isDone()) {
-			displayLS = pool.scheduleAtFixedRate(() ->{
+		if (displayLS == null || displayLS.isDone()) {
+			displayLS = pool.scheduleAtFixedRate(() -> {
 				drawRawScanPoints();
 			}, 0, 200, TimeUnit.MILLISECONDS);
 		}
 	}
-	
+
 	public void stopDisplayThread() {
-		if(displayLS != null || !displayLS.isDone()) {
+		if (displayLS != null || !displayLS.isDone()) {
 			displayLS.cancel(true);
 		}
 	}
@@ -127,8 +139,11 @@ public class LSScanner {
 	public void closeLaserSocket() {
 		try {
 			if (timerLS != null) {
+				System.out.println("Wait until Laser Thread isDone ...");
+				timerLS.cancel(true);
 				while (!timerLS.isDone())
 					;
+				System.out.println("Thread canceled!");
 			}
 			if (clientSocketLS != null && !clientSocketLS.isClosed()) {
 				if (visu.showServerConfirmation("Laser") == 1) {
@@ -167,6 +182,10 @@ public class LSScanner {
 			}
 		}
 		findClusters();
+		if(dataReady == false) {
+			dataReady = true;
+			System.out.println("ready!");
+		}
 	}
 
 	public void findClusters() {
@@ -210,7 +229,11 @@ public class LSScanner {
 	public void setVisu(VisuGUI visu) {
 		this.visu = visu;
 	}
-	
+
+	public boolean isDataReady() {
+		return dataReady;
+	}
+
 	public void drawRawScanPoints() {
 		Platform.runLater(() -> {
 			visu.getKoosCanvas().clear();
@@ -239,7 +262,8 @@ public class LSScanner {
 			visu.getKoosCanvas().drawLine(x1, y2, x2, y2, 1, Color.YELLOW);
 			visu.getKoosCanvas().drawLine(x2, y2, x2, y1, 1, Color.YELLOW);
 			visu.getKoosCanvas().drawLine(x2, y1, x1, y1, 1, Color.YELLOW);
-			if(nearestPoint.getDist() > 0) visu.getKoosCanvas().drawDataPoint(nearestPoint.getX(), nearestPoint.getY(), 50, 50, Color.ORANGE);
+			if (nearestPoint.getDist() > 0)
+				visu.getKoosCanvas().drawDataPoint(nearestPoint.getX(), nearestPoint.getY(), 50, 50, Color.ORANGE);
 		});
 		return nearestPoint.getDist();
 	}
@@ -248,14 +272,18 @@ public class LSScanner {
 		final double boundLow = angleStart < angleEnd ? angleStart : angleEnd;
 		final double boundHigh = angleStart < angleEnd ? angleEnd : angleStart;
 		LSScanPoint nearestPoint = getScanpoints().stream().filter(scanpoint -> {
-			return (scanpoint.getAngle() > boundLow && scanpoint.getAngle() < boundHigh && scanpoint.getDist() < distance && scanpoint.getDist() > 0);
+			return (scanpoint.getAngle() > boundLow && scanpoint.getAngle() < boundHigh
+					&& scanpoint.getDist() < distance && scanpoint.getDist() > 0);
 		}).min(Comparator.comparingDouble(LSScanPoint::getDist)).orElse(new LSScanPoint(0, 0));
-		
+
 		Platform.runLater(() -> {
-			visu.getKoosCanvas().drawLine(0, 0, distance*Math.cos(Math.toRadians(angleStart)), distance*Math.sin(Math.toRadians(angleStart)), 1, Color.YELLOW);
-			visu.getKoosCanvas().drawLine(0, 0, distance*Math.cos(Math.toRadians(angleEnd)), distance*Math.sin(Math.toRadians(angleEnd)), 1, Color.YELLOW);
+			visu.getKoosCanvas().drawLine(0, 0, distance * Math.cos(Math.toRadians(angleStart)),
+					distance * Math.sin(Math.toRadians(angleStart)), 1, Color.YELLOW);
+			visu.getKoosCanvas().drawLine(0, 0, distance * Math.cos(Math.toRadians(angleEnd)),
+					distance * Math.sin(Math.toRadians(angleEnd)), 1, Color.YELLOW);
 			visu.getKoosCanvas().drawArc(0, 0, distance, angleStart, angleEnd, 1, Color.YELLOW);
-			if(nearestPoint.getDist() > 0) visu.getKoosCanvas().drawDataPoint(nearestPoint.getX(), nearestPoint.getY(), 50, 50, Color.ORANGE);
+			if (nearestPoint.getDist() > 0)
+				visu.getKoosCanvas().drawDataPoint(nearestPoint.getX(), nearestPoint.getY(), 50, 50, Color.ORANGE);
 		});
 		return nearestPoint.getDist();
 	}

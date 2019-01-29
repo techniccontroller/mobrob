@@ -143,24 +143,31 @@ public class MyRob {
 		resolver.setStrategy(strategy);
 		if(strategy == null && behGroups.size() > 0) {
 			behGroups.get(0).activateExclusive();
+		}else {
+			strategy.setFinish(false);
 		}
 		resolver.startWorking();
 	}
 	
 	public void stop() {
 		resolver.stopWorking();
+		behGroups.stream().forEach(bg -> bg.setSuccess(false));
 		if(actuator != null) {
 			actuator.closeActuatorSocket();
 			logOnVisu("Actuator Socket closed!\n");
+			System.out.println("Actuator Socket closed!");
 		}
 		if(camera != null) {
 			camera.closeCameraSocket();
 			logOnVisu("Camera Socket closed!\n");
+			System.out.println("Camera Socket closed!");
 		}
 		if(lsscanner != null) {
 			lsscanner.stopLaserscannerThread();
+			System.out.println("Laserscanner Thread canceled!");
 			lsscanner.closeLaserSocket();
-			logOnVisu("Laserscanner Socket closed!\n");	
+			logOnVisu("Laserscanner Socket closed!\n");
+			System.out.println("Laserscanner Socket closed!");
 		}
 	}
 	

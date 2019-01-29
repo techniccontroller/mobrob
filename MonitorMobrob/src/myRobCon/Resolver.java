@@ -73,29 +73,30 @@ public class Resolver {
 				if(strategy != null) {
 					strategy.plan();
 				}
-				
-				robot.getLsscanner().drawRawScanPoints();
-				
-				lstDesRotVel.clear();
-				lstDesTransVel.clear();
-				lstDesTransDir.clear();
-				
-				// Run fire() Methode of all active Behaviours
-				lstBehaviours.stream().forEach(beh -> beh.fire());
-				
-				
-				if(lstDesTransVel.size() > 0 || lstDesTransDir.size() > 0 || lstDesRotVel.size() > 0) {
-					int outputTransVel = resolveNumber(lstDesTransVel).intValue();
-					int outputTransDir = resolveNumber(lstDesTransDir).intValue();
-					int outputRotVel = resolveNumber(lstDesRotVel).intValue();
+				if(strategy == null || !strategy.isFinish()) {
+					robot.getLsscanner().drawRawScanPoints();
 					
-					if(lastTransVel != outputTransVel || lastTransDir != outputTransDir || lastRotVel != outputRotVel) {
-						robot.getActuator().speed(outputTransVel, outputTransDir, outputRotVel);
+					lstDesRotVel.clear();
+					lstDesTransVel.clear();
+					lstDesTransDir.clear();
+					
+					// Run fire() Methode of all active Behaviours
+					lstBehaviours.stream().forEach(beh -> beh.fire());
+					
+					
+					if(lstDesTransVel.size() > 0 || lstDesTransDir.size() > 0 || lstDesRotVel.size() > 0) {
+						int outputTransVel = resolveNumber(lstDesTransVel).intValue();
+						int outputTransDir = resolveNumber(lstDesTransDir).intValue();
+						int outputRotVel = resolveNumber(lstDesRotVel).intValue();
+						
+						if(lastTransVel != outputTransVel || lastTransDir != outputTransDir || lastRotVel != outputRotVel) {
+							robot.getActuator().speed(outputTransVel, outputTransDir, outputRotVel);
+						}
+						
+						lastTransVel = outputTransVel;
+						lastTransDir = outputTransDir;
+						lastRotVel = outputRotVel;
 					}
-					
-					lastTransVel = outputTransVel;
-					lastTransDir = outputTransDir;
-					lastRotVel = outputRotVel;
 				}
 			}
 		};

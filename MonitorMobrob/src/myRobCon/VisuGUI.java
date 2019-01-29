@@ -39,6 +39,7 @@ public class VisuGUI extends Application {
 	private TextArea textArea;
 	private ImageView imageView;
 	private KOOSCanvas koosCanvas;
+	private Button btnStartStopResolver;
 	
 	private static VisuGUI appInstance;
 	private static final Lock lock = new ReentrantLock();
@@ -113,7 +114,7 @@ public class VisuGUI extends Application {
          * */        
         BorderPane bottomPane = new BorderPane();
         bottomPane.setPadding(new Insets(10, 10, 10, 10));
-        Button btnStartStopResolver = new Button("Start");
+        btnStartStopResolver = new Button("Start");
         btnStartStopResolver.setPrefWidth(300);
         btnStartStopResolver.setPrefHeight(30);
         Font bigFont = Font.font("Tahoma", FontWeight.NORMAL, 15);
@@ -122,12 +123,10 @@ public class VisuGUI extends Application {
         btnStartStopResolver.setOnAction(e -> {
         	if(btnStartStopResolver.getText() == "Start") {
         		robot.run();
-        		btnStartStopResolver.setStyle("-fx-background-color: #ff0000");
-        		btnStartStopResolver.setText("Stop");
+        		setStartButtonRunning(true);
         	}else {
         		robot.stop();
-        		btnStartStopResolver.setStyle("-fx-background-color: #00ff00");
-        		btnStartStopResolver.setText("Start");
+        		setStartButtonRunning(false);
         	}
         });
         bottomPane.setCenter(btnStartStopResolver);
@@ -209,6 +208,21 @@ public class VisuGUI extends Application {
 	
 	public void log(String text) {
 		textArea.setText(textArea.getText() + text);
+	}
+	
+	public void setStartButtonRunning(boolean status) {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				if(status) {
+					btnStartStopResolver.setStyle("-fx-background-color: #ff0000");
+		    		btnStartStopResolver.setText("Stop");
+				}else {
+					btnStartStopResolver.setStyle("-fx-background-color: #00ff00");
+					btnStartStopResolver.setText("Start");
+				}
+			}
+		});
 	}
 	
 	public int showServerConfirmation(String type) {
