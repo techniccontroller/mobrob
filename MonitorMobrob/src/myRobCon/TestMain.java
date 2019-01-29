@@ -1,5 +1,8 @@
 package myRobCon;
 
+import myRobCon.behaviours.BehConstTransVel;
+import myRobCon.behaviours.BehLimFor;
+import myRobCon.behaviours.BehaviourGroup;
 
 public class TestMain {
 	

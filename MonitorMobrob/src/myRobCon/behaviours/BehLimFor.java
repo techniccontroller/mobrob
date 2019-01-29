@@ -1,4 +1,6 @@
-package myRobCon;
+package myRobCon.behaviours;
+
+import myRobCon.DesTransVel;
 
 public class BehLimFor extends Behaviour{
 	private double stopdistance;

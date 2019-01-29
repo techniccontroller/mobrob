@@ -1,7 +1,10 @@
-package myRobCon;
+package myRobCon.behaviours;
 
 import java.util.LinkedList;
 import java.util.stream.Collectors;
+
+import myRobCon.MyRob;
+import myRobCon.Resolver;
 
 public class BehaviourGroup {
 	private String name;

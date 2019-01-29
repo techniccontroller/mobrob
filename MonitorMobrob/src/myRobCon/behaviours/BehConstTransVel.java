@@ -1,4 +1,7 @@
-package myRobCon;
+package myRobCon.behaviours;
+
+import myRobCon.DesTransDir;
+import myRobCon.DesTransVel;
 
 public class BehConstTransVel extends Behaviour {
 	protected int transVel;

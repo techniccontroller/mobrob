@@ -2,6 +2,8 @@ package myRobCon;
 
 import java.util.LinkedList;
 
+import myRobCon.behaviours.BehaviourGroup;
+
 public class MyRobSim {
 	private String id;
 	private Resolver resolver;

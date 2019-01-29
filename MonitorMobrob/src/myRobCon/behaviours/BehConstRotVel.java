@@ -1,4 +1,6 @@
-package myRobCon;
+package myRobCon.behaviours;
+
+import myRobCon.DesRotVel;
 
 public class BehConstRotVel extends Behaviour {
 	protected int tolerance, rotVel;

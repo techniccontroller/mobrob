@@ -7,6 +7,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import myRobCon.behaviours.Behaviour;
+
 public class Resolver {
 	private MyRob robot;
 	private LinkedList<DesTransVel> lstDesTransVel;

@@ -3,6 +3,7 @@ package myRobCon;
 import java.util.LinkedList;
 
 import javafx.application.Platform;
+import myRobCon.behaviours.BehaviourGroup;
 
 public class MyRob {
 	private String id;

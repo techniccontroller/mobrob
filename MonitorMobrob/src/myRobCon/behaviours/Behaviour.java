@@ -1,4 +1,8 @@
-package myRobCon;
+package myRobCon.behaviours;
+
+import myRobCon.Desire;
+import myRobCon.MyRob;
+import myRobCon.Resolver;
 
 public abstract class Behaviour {
 	private String name;
