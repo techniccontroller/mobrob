@@ -1,5 +1,6 @@
 package myRobCon;
 
+import myRobCon.behaviours.BehAlign;
 import myRobCon.behaviours.BehConstTransVel;
 import myRobCon.behaviours.BehLimFor;
 import myRobCon.behaviours.BehaviourGroup;
@@ -13,6 +14,8 @@ public class TestMain {
 		BehaviourGroup dock = new BehaviourGroup("Dock");
 		BehConstTransVel cv = new BehConstTransVel("ConstVel", 40);
 		BehLimFor lv = new BehLimFor("limit", 300, 500, 20);
+		BehAlign al = new BehAlign("align", 20, 30);
+		dock.add(al, 50);
 		dock.add(cv, 50);
 		dock.add(lv, 90);
 		robot.add(dock);
