@@ -143,6 +143,11 @@ public class MyRob {
 	}
 	
 	public void stop() {
+		resolver.stopWorking();
+		if(actuator != null) {
+			actuator.closeActuatorSocket();
+			logOnVisu("Actuator Socket closed!\n");
+		}
 		if(camera != null) {
 			camera.closeCameraSocket();
 			logOnVisu("Camera Socket closed!\n");
@@ -152,11 +157,6 @@ public class MyRob {
 			lsscanner.closeLaserSocket();
 			logOnVisu("Laserscanner Socket closed!\n");	
 		}
-		if(actuator != null) {
-			actuator.closeActuatorSocket();
-			logOnVisu("Actuator Socket closed!\n");
-		}
-		resolver.stopWorking();
 	}
 	
 	public void logOnVisu(String text) {

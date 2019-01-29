@@ -47,6 +47,7 @@ public class Actuator {
 	public void closeActuatorSocket() {
 		if (!(clientSocketCon == null) && !clientSocketCon.isClosed()) {
 			try {
+				stop();
 				clientSocketCon.shutdownOutput();
 				clientSocketCon.close();
 				actuatorActive = false;
