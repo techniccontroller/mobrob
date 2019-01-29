@@ -62,21 +62,18 @@ public class EGOPoseSensor {
 	public int startSensorThread() {
 		if (timerEGO == null || timerEGO.isDone()) {
 			initSensorSocket();
-			System.out.println("EGOSensor thread start");
 			visu.getKoosCanvas().setXmax(1000.0);
 			Runnable scanGrabber = new Runnable() {
 
 				@Override
 				public void run() {
-					System.out.println("EGOSensor thread run");
-					
 					String message = "getData()";
 					try {
 						if (sensorActive) {
 							outToServerEGO.write(message+"\n");
 							outToServerEGO.flush();
 							String data = inFromServerEGO.readLine();
-							System.out.println(data);
+							//System.out.println(data);
 							synchronized (lock) {
 								// Ignore first sample
 								if(firstSample) {
@@ -118,11 +115,11 @@ public class EGOPoseSensor {
 				while (!timerEGO.isDone());
 			}
 			if (!clientSocketEGO.isClosed()) {
-				if (visu.showServerConfirmation("Laser") == 1) {
+				if (visu.showServerConfirmation("EGOPose") == 1) {
 					outToServerEGO.write("closeDriver");
 					outToServerEGO.flush();
 				}
-				System.out.println("Close LS Socket...");
+				System.out.println("Close EGOPose Socket...");
 				clientSocketEGO.shutdownOutput();
 				clientSocketEGO.close();
 				sensorActive = false;
@@ -141,7 +138,7 @@ public class EGOPoseSensor {
 			int dy1 = Integer.valueOf(valuesStr[3]);
 			int dx2 = Integer.valueOf(valuesStr[0]);
 			int dy2 = Integer.valueOf(valuesStr[1]); 
-			System.out.println("x1: " + dx1 + "; \ty1: " + dy1 + "x2: " + dx2 + "; \ty2: " + dy2); 
+			System.out.format("x1: %4d  y1: %4d  x2: %4d  y2: %d --> diffs: %4d/%4d \n", dx1, dy1, dx2, dy2, (dx1-dx2), (dy1-dy2));
 			angleR = angleR + (Math.atan2(dy1-dy2, 470));
 			xR = xR + (int) ((dx1+dx2)/2 * Math.cos(angleR)) + (int)((dy1+dy2)/2 * Math.sin(angleR));
 			yR = yR - (int) ((dx1+dx2)/2 * Math.sin(angleR)) + (int)((dy1+dy2)/2 * Math.cos(angleR));
