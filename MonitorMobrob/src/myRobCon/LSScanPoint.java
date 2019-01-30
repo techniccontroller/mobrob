@@ -1,14 +1,16 @@
 package myRobCon;
 
-public class LSScanPoint{
+import java.awt.geom.Point2D;
+
+public class LSScanPoint extends Point2D{
 	private double angle;
 	private double dist;
 	private double x;
 	private double y;
 	
 	public LSScanPoint(String value){
-		this.angle = -1 * Float.valueOf(value.split(",")[0]);
-		this.dist = Float.valueOf(value.split(",")[1]);
+		this.angle = -1 * java.lang.Float.valueOf(value.split(",")[0]);
+		this.dist = java.lang.Float.valueOf(value.split(",")[1]);
 		this.x = dist * Math.cos(Math.toRadians(angle));
 		this.y = dist * Math.sin(Math.toRadians(angle));
 		this.angle = normalizeAngle(this.angle);
@@ -30,14 +32,6 @@ public class LSScanPoint{
 		return dist;
 	}
 	
-	public double getX(){
-		return this.x;
-	}
-	
-	public double getY(){
-		return this.y;
-	}
-	
 	public static double distance(LSScanPoint p1, LSScanPoint p2) {
 		return Math.sqrt((p1.getX()-p2.getX())*(p1.getX()-p2.getX()) + (p1.getY()-p2.getY())*(p1.getY()-p2.getY()));
 	}
@@ -47,5 +41,21 @@ public class LSScanPoint{
 	    while (newAngle <= -180) newAngle += 360;
 	    while (newAngle > 180) newAngle -= 360;
 	    return newAngle;
+	}
+
+	@Override
+	public void setLocation(double x, double y) {
+		this.x = x;
+		this.y = y;
+	}
+	
+	@Override
+	public double getX(){
+		return this.x;
+	}
+	
+	@Override
+	public double getY(){
+		return this.y;
 	}
 }
