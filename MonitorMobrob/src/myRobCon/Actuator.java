@@ -59,7 +59,7 @@ public class Actuator {
 	
 	public void move(int distance, int speed, int direction) {
 		try {
-			if (clientSocketCon.isConnected()) {
+			if (clientSocketCon != null && clientSocketCon.isConnected()) {
 				outToServerCon.write("move(" + distance + "," + speed + "," + direction + ")\n");
 				outToServerCon.flush();
 				System.out.println(inFromServerCon.readLine());
@@ -72,7 +72,7 @@ public class Actuator {
 	
 	public void turn(int angle, int speed, int radius) {
 		try {
-			if (clientSocketCon.isConnected()) {
+			if (clientSocketCon != null && clientSocketCon.isConnected()) {
 				outToServerCon.write("turn(" + angle + "," + speed + "," + radius + ")\n");
 				outToServerCon.flush();
 				System.out.println(inFromServerCon.readLine());
@@ -85,7 +85,7 @@ public class Actuator {
 	
 	public void speed(int speed, int direction, int rotspeed) {
 		try {
-			if (clientSocketCon.isConnected()) {
+			if (clientSocketCon != null && clientSocketCon.isConnected()) {
 				outToServerCon.write("speed(" + speed + "," + direction + "," + rotspeed + ")\n");
 				outToServerCon.flush();
 				System.out.println(inFromServerCon.readLine());
@@ -98,7 +98,7 @@ public class Actuator {
 	
 	public void stop() {
 		try {
-			if (clientSocketCon.isConnected()) {
+			if (clientSocketCon != null && clientSocketCon.isConnected()) {
 				outToServerCon.write("stop()\n");
 				outToServerCon.flush();
 				System.out.println(inFromServerCon.readLine());
