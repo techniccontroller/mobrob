@@ -112,6 +112,16 @@ public class KOOSCanvas extends Canvas {
 		gc.strokeLine(x1 * scale, y1 * scale, x2 * scale, y2 * scale);
 	}
 	
+	public void drawStraight(double slope, double intercept, double width, Color color) {
+		drawLine(-xmax, slope*(-1)*xmax+intercept, xmax, slope*xmax+intercept, width, color);
+	}
+	
+	public void drawText(String text, double x, double y, Color color) {
+		gc.setFill(color);
+		gc.setLineWidth(2);
+		gc.fillText(text, x*scale, y*scale);
+	}
+	
 	public void drawArc(double x, double y, double radius, double startAngle, double endAngle, double width, Color color) {
 		gc.setStroke(color);
 		gc.setLineWidth(width);
