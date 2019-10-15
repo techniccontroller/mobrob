@@ -85,6 +85,18 @@ public class VisuSettings extends BorderPane{
 		txtPortEGO.setText("" + robot.getEgoSensor().getPort());
 		grid.add(txtPortEGO, 1, 9);
 		
+		Text titleGripper = new Text("Gripper Server");
+		titleGripper.setFont(titleFont);
+		grid.add(titleGripper, 0, 10, 2, 1);
+
+		Label lblPortGripper = new Label("Port:");
+		grid.add(lblPortGripper, 0, 11);
+
+		TextField txtPortGripper = new TextField();
+		txtPortGripper.setPrefWidth(70);
+		txtPortGripper.setText("" + robot.getGripper().getPort());
+		grid.add(txtPortGripper, 1, 12);
+		
 		setTop(grid);
 		
 		BorderPane bottomPane = new BorderPane();
@@ -98,6 +110,7 @@ public class VisuSettings extends BorderPane{
 			robot.getLsscanner().setPort(Integer.valueOf(txtPortLaser.getText()));
 			robot.getActuator().setPort(Integer.valueOf(txtPortActuator.getText()));
 			robot.getEgoSensor().setPort(Integer.valueOf(txtPortEGO.getText()));
+			robot.getGripper().setPort(Integer.valueOf(txtPortGripper.getText()));
 			System.out.println("Settings saved");
 			stage.close();
 		});

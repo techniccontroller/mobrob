@@ -87,7 +87,7 @@ public class VisuGUI extends Application {
         textArea.setEditable(false);
         leftPane.getChildren().add(textArea);
         controlPanel = new ControlPanel(robot);
-        controlPanel.setVisible(false);
+        leftPane.getChildren().add(new Label("Controls:"));
         leftPane.getChildren().add(controlPanel);
         mainPanel.setLeft(leftPane);
         

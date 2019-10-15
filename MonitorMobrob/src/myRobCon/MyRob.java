@@ -16,6 +16,7 @@ public class MyRob {
 	private Camera camera;
 	private Actuator actuator;
 	private EGOPoseSensor egoSensor;
+	private Gripper gripper;
 	private VisuGUI visu;
 	private boolean shutdown = false;
 	
@@ -42,6 +43,7 @@ public class MyRob {
 		addActuator(5054);
 		addCamera(5001);
 		addEGOPoseSensor(5053);
+		addGripper(5044);
 	}
 	
 	public void setVisu(VisuGUI visu) {
@@ -78,6 +80,11 @@ public class MyRob {
 		egoSensor.setVisu(visu);
 		return 0;
 	}
+	
+	public int addGripper(int port) {
+		gripper = new Gripper(ipaddress, port);
+		return 0;
+	}
 
 	public String getIpaddress() {
 		return ipaddress;
@@ -101,6 +108,10 @@ public class MyRob {
 
 	public EGOPoseSensor getEgoSensor() {
 		return egoSensor;
+	}
+	
+	public Gripper getGripper() {
+		return gripper;
 	}
 
 	public void add(BehaviourGroup behGroup) {

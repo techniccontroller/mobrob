@@ -16,8 +16,9 @@ public class VisuMenuBar extends MenuBar {
 	private MenuItem menuConLaser;
 	private MenuItem menuConCamera;
 	private MenuItem menuConEGO;
+	private MenuItem menuConGripper;
 	private MenuItem menuSettings;
-
+	
 	public VisuMenuBar(VisuGUI visu) {
 		this.robot = visu.getRobot();
 		this.visu = visu;
@@ -31,6 +32,8 @@ public class VisuMenuBar extends MenuBar {
 		menuConCamera.setOnAction(this::startCamera);
 		menuConEGO = new MenuItem("Connect EGOPose Sensor");
 		menuConEGO.setOnAction(this::startEGOPoseSensor);
+		menuConGripper = new MenuItem("Connect Gripper");
+		menuConGripper.setOnAction(this::connectGripper);
 		menuSettings = new MenuItem("Settings");
 		menuSettings.setOnAction(this::openSettings);
 
@@ -38,6 +41,7 @@ public class VisuMenuBar extends MenuBar {
 		menu.getItems().add(menuConLaser);
 		menu.getItems().add(menuConCamera);
 		menu.getItems().add(menuConEGO);
+		menu.getItems().add(menuConGripper);
 		menu.getItems().add(menuSettings);
 
 		getMenus().add(menu);
@@ -72,11 +76,11 @@ public class VisuMenuBar extends MenuBar {
 	protected void connectActuator(ActionEvent event) {
 		int res = robot.getActuator().initActuatorSocket();
 		if (res == 0) {
-			visu.getControlPanel().setVisible(true);
+			visu.getControlPanel().showActuatorPane(true);
 			menuConRobot.setText("Disconnect Actuator");
 		} else if (res == 1) {
 			robot.getActuator().closeActuatorSocket();
-			visu.getControlPanel().setVisible(false);
+			visu.getControlPanel().showActuatorPane(false);
 			menuConRobot.setText("Connect Actuator");
 		}
 	}
@@ -90,6 +94,18 @@ public class VisuMenuBar extends MenuBar {
 			robot.getEgoSensor().stopSensorThread();
 			robot.getEgoSensor().closeSensorSocket();
 			menuConEGO.setText("Connect EGOPose Sensor");
+		}
+	}
+	
+	protected void connectGripper(ActionEvent event) {
+		int res = robot.getGripper().initGripperSocket();
+		if (res == 0) {
+			visu.getControlPanel().showGripperPane(true);
+			menuConGripper.setText("Disconnect Gripper");
+		} else if (res == 1) {
+			robot.getGripper().closeGripperSocket();
+			visu.getControlPanel().showGripperPane(false);
+			menuConGripper.setText("Connect Gripper");
 		}
 	}
 
